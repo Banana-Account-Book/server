@@ -40,7 +40,7 @@ func NewServer(lc fx.Lifecycle) *App {
 		OnStart: func(ctx context.Context) error {
 			go func() {
 				port := os.Getenv("PORT")
-				fmt.Println("Server started on port:", port)
+				fmt.Println("🔥Server started on port:", port, "🔥")
 				server.Start(port)
 			}()
 			return nil
