@@ -1,0 +1,13 @@
+basePath: /
+info:
+  contact:
+    email: hch950627@naver.com
+    name: API Support
+  description: API Server for Banana Account Book
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: Banana Account Book API
+  version: "1.0"
+paths: {}
+swagger: "2.0"
