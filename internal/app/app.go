@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/signal"
 
+	"banana-account-book.com/internal/libs/db"
 	"banana-account-book.com/internal/router"
 	"github.com/gofiber/fiber/v2"
 	"go.uber.org/fx"
@@ -40,6 +41,7 @@ func NewServer(lc fx.Lifecycle) *App {
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
 			go func() {
+				db.Init()
 				router.Route(app.App)
 				port := os.Getenv("PORT")
 				fmt.Println("🔥Server started on port:", port, "🔥")
