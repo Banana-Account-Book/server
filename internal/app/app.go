@@ -8,6 +8,7 @@ import (
 
 	"banana-account-book.com/internal/config"
 	"banana-account-book.com/internal/libs/db"
+	"banana-account-book.com/internal/middlewares"
 	"banana-account-book.com/internal/router"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -21,7 +22,9 @@ type App struct {
 }
 
 func New() *App {
-	fiber := fiber.New()
+	fiber := fiber.New(fiber.Config{
+		ErrorHandler: middlewares.ErrorHandler,
+	})
 	return &App{fiber}
 }
 
