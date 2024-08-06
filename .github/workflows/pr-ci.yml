@@ -1,22 +1,17 @@
 name: pr-ci
-on:
-  pull_request:
-    types: [opened, synchronize, reopened]
+on: [pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [20.x]
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
-	  - name: Set up Go
-		uses: actions/setup-go@v4
-		with:
-		  go-version: '1.22'
-	  - name: Build
-		run: go build -v
+        uses: actions/checkout@v3
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.22"
+      - name: Build
+        run: go build -v ./cmd/main.go
   sonarcloud:
     runs-on: ubuntu-latest
     steps:
