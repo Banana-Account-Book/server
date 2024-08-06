@@ -6,9 +6,11 @@ import (
 	"os"
 	"os/signal"
 
+	"banana-account-book.com/internal/config"
 	"banana-account-book.com/internal/libs/db"
 	"banana-account-book.com/internal/router"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/swagger"
 	"go.uber.org/fx"
 )
 
@@ -42,6 +44,13 @@ func NewServer(lc fx.Lifecycle) *App {
 		OnStart: func(ctx context.Context) error {
 			go func() {
 				db.Init()
+				app.Get("/swagger/*", swagger.HandlerDefault)
+				app.Get("/swagger/*", swagger.New(swagger.Config{ // custom
+					URL:         config.Origin + "/doc.json",
+					DeepLinking: false,
+					// Expand ("list") or Collapse ("none") tag groups by default
+					DocExpansion: "none",
+				}))
 				router.Route(app.App)
 				port := os.Getenv("PORT")
 				fmt.Println("🔥Server started on port:", port, "🔥")

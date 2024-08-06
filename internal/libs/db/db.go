@@ -30,7 +30,7 @@ func Init() *gorm.DB {
 		sslMode = "disable"
 	}
 
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s TimeZone=UTC sslmode=%s", config.DB_HOST, config.DB_USER, config.DB_PASSWORD, config.DB_NAME, config.DB_PORT, sslMode)
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s TimeZone=UTC sslmode=%s", config.DbHost, config.DbUser, config.DbPassword, config.DbName, config.DbPort, sslMode)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: logger,
