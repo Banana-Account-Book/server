@@ -1,13 +1,17 @@
 package entity
 
-import "time"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type Aggregate struct {
-	CreatedAt time.Time `json:"createdAt" gorm:"column:createdAt"`
-	UpdatedAt time.Time `json:"updatedAt" gorm:"column:updatedAt"`
+	CreatedAt time.Time `json:"_", gorm:"autoCreateTime:nano;"`
+	UpdatedAt time.Time `json:"__", gorm:"autoUpdateTime:nano;"`
 }
 
 type SoftDeletableAggregate struct {
 	Aggregate
-	DeletedAt *time.Time `json:"deletedAt" gorm:"column:deletedAt"`
+	DeletedAt gorm.DeletedAt `json:"_", gorm:"index;"`
 }
