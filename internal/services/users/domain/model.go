@@ -1,12 +1,15 @@
 package domain
 
 import (
+	"fmt"
 	"strconv"
+	"time"
 
 	"banana-account-book.com/internal/config"
 	appError "banana-account-book.com/internal/libs/app-error"
 	"banana-account-book.com/internal/libs/entity"
 	httpCode "banana-account-book.com/internal/libs/http/code"
+	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 	"github.com/lib/pq"
 
@@ -52,4 +55,20 @@ func New(email, password, name string, providers []string) (*User, error) {
 	}
 
 	return user, nil
+}
+
+func (u *User) EncodeAccessToken() (string, error) {
+	token := jwt.New(jwt.SigningMethodHS256)
+
+	claims := token.Claims.(jwt.MapClaims)
+	claims["userId"] = u.Id
+	claims["iat"] = time.Now().Unix()
+	claims["exp"] = time.Now().Add(time.Hour * 24 * 7).Unix()
+
+	tokenString, err := token.SignedString([]byte(config.SecretKey))
+	if err != nil {
+		return "", appError.New(httpCode.InternalServerError, fmt.Sprintf("Failed to encode access token. %v", err), "")
+	}
+
+	return tokenString, nil
 }

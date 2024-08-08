@@ -23,11 +23,14 @@ func NewRepository(manager *gorm.DB) UserRepository {
 }
 
 func (r *UserRepositoryImpl) FindByEmail(email string) (*domain.User, bool, error) {
-	user := &domain.User{}
-	if err := r.manager.Where("email = ?", email).First(user).Error; err != nil {
+	users := []domain.User{}
+	if err := r.manager.Where("email = ?", email).Find(&users).Error; err != nil {
 		return nil, false, appError.New(httpCode.InternalServerError, fmt.Sprintf("Failed to findByEmail user. %s", err.Error()), "")
 	}
-	return user, true, nil
+	if len(users) == 0 {
+		return nil, false, nil
+	}
+	return &users[0], true, nil
 }
 
 func (r *UserRepositoryImpl) Save(user *domain.User) error {

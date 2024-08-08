@@ -34,11 +34,11 @@ func (c *UserController) signUp(ctx *fiber.Ctx) error {
 	}
 
 	// 2. call application service method
-	err := c.userService.SignUp(dto.Email, dto.Password, dto.Name)
+	accessToken, err := c.userService.SignUp(dto.Email, dto.Password, dto.Name)
 	if err != nil {
 		return err
 	}
 	return ctx.Status(httpCode.Created.Code).JSON(fiber.Map{
-		"message": "success",
+		"accessToken": accessToken,
 	})
 }

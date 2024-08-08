@@ -12,4 +12,5 @@ var (
 	DbPort       = os.Getenv("DB_PORT")
 	Origin       = os.Getenv("ORIGIN")
 	Salt         = os.Getenv("SALT")
+	SecretKey    = os.Getenv("SECRET_KEY")
 )
