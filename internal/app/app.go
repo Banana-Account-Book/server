@@ -7,9 +7,9 @@ import (
 	"os/signal"
 
 	"banana-account-book.com/internal/config"
-	"banana-account-book.com/internal/libs/db"
 	"banana-account-book.com/internal/middlewares"
 	"banana-account-book.com/internal/router"
+	user "banana-account-book.com/internal/services/users/presentation"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
@@ -42,14 +42,12 @@ func (app *App) Stop() {
 	}()
 }
 
-func NewServer(lc fx.Lifecycle) *App {
+func NewServer(lc fx.Lifecycle, userController *user.UserController) *App {
 	app := New()
 
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
 			go func() {
-				db.Init()
-
 				// request logger
 				app.Use(requestid.New(), logger.New(logger.Config{
 					Format:     "${time} | ${pid} | ${locals:requestid} | ${status} - ${method} ${path}\u200b\n",
@@ -65,7 +63,7 @@ func NewServer(lc fx.Lifecycle) *App {
 					DocExpansion: "none",
 				}))
 
-				router.Route(app.App)
+				router.Route(app.App, userController)
 				port := os.Getenv("PORT")
 				fmt.Println("🔥Server started on port:", port, "🔥")
 				app.Start(port)

@@ -7,11 +7,11 @@ import (
 )
 
 type Aggregate struct {
-	CreatedAt time.Time `json:"_", gorm:"autoCreateTime:nano;"`
-	UpdatedAt time.Time `json:"__", gorm:"autoUpdateTime:nano;"`
+	CreatedAt time.Time `json:"-" gorm:"column:createdAt;autoCreateTime:nano"`
+	UpdatedAt time.Time `json:"-" gorm:"column:updatedAt;autoUpdateTime:nano"`
 }
 
 type SoftDeletableAggregate struct {
 	Aggregate
-	DeletedAt gorm.DeletedAt `json:"_", gorm:"index;"`
+	DeletedAt gorm.DeletedAt `json:"-" gorm:"column:deletedAt"`
 }
