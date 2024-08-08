@@ -14,6 +14,10 @@ type applicationError struct {
 	Stack         string
 }
 
+type ErrorResponse struct {
+	Data string `json:"data"`
+}
+
 func New(status httpCode.Status, msg, clientMsg string) *applicationError {
 	clientMessage := clientMsg
 	if clientMessage == "" {

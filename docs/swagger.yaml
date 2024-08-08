@@ -1,4 +1,32 @@
 basePath: /
+definitions:
+  appError.ErrorResponse:
+    properties:
+      data:
+        type: string
+    type: object
+  dto.SignUpRequestBody:
+    properties:
+      email:
+        example: hch950627@naver.com
+        type: string
+      name:
+        example: arthur
+        type: string
+      password:
+        example: q1w2e3r4!@
+        type: string
+    required:
+    - email
+    - name
+    - password
+    type: object
+  dto.SignUpResponse:
+    properties:
+      accessToken:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+    type: object
 info:
   contact:
     email: hch950627@naver.com
@@ -9,5 +37,35 @@ info:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   title: Banana Account Book API
   version: "1.0"
-paths: {}
+paths:
+  /users/signup:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user and return an access token
+      parameters:
+      - description: Sign up information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SignUpRequestBody'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Returns access token
+          schema:
+            $ref: '#/definitions/dto.SignUpResponse'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/appError.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/appError.ErrorResponse'
+      summary: User sign up
+      tags:
+      - users
 swagger: "2.0"
