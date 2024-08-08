@@ -41,13 +41,13 @@ func (c *UserController) signUp(ctx *fiber.Ctx) error {
 	}
 
 	if err := appError.ValidateDto(body); err != nil {
-		return err
+		return appError.Wrap(err)
 	}
 
 	// 2. call application service method
 	accessToken, err := c.userService.SignUp(body.Email, body.Password, body.Name)
 	if err != nil {
-		return err
+		return appError.Wrap(err)
 	}
 
 	// 3. return response

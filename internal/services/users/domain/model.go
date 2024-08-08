@@ -1,7 +1,6 @@
 package domain
 
 import (
-	"fmt"
 	"strconv"
 	"time"
 
@@ -9,7 +8,7 @@ import (
 	appError "banana-account-book.com/internal/libs/app-error"
 	"banana-account-book.com/internal/libs/entity"
 	httpCode "banana-account-book.com/internal/libs/http/code"
-	"github.com/golang-jwt/jwt"
+	"banana-account-book.com/internal/libs/jwt"
 	"github.com/google/uuid"
 	"github.com/lib/pq"
 
@@ -58,17 +57,41 @@ func New(email, password, name string, providers []string) (*User, error) {
 }
 
 func (u *User) EncodeAccessToken() (string, error) {
-	token := jwt.New(jwt.SigningMethodHS256)
-
-	claims := token.Claims.(jwt.MapClaims)
-	claims["userId"] = u.Id
-	claims["iat"] = time.Now().Unix()
-	claims["exp"] = time.Now().Add(time.Hour * 24 * 7).Unix()
-
-	tokenString, err := token.SignedString([]byte(config.SecretKey))
-	if err != nil {
-		return "", appError.New(httpCode.InternalServerError, fmt.Sprintf("Failed to encode access token. %v", err), "")
+	type result struct {
+		token string
+		err   error
 	}
 
-	return tokenString, nil
+	accessTokenChan := make(chan result, 1)
+	refreshTokenChan := make(chan error, 1)
+	go func() {
+		token, err := jwt.Sign(u.Id, time.Hour*24*7)
+		accessTokenChan <- result{token: token, err: err}
+	}()
+	go func() {
+		err := u.rotateRefreshToken()
+		refreshTokenChan <- err
+	}()
+
+	accessTokenResult := <-accessTokenChan
+	refreshTokenErr := <-refreshTokenChan
+
+	if accessTokenResult.err != nil {
+		return "", appError.Wrap(accessTokenResult.err)
+	}
+
+	if refreshTokenErr != nil {
+		return "", appError.Wrap(refreshTokenErr)
+	}
+
+	return accessTokenResult.token, nil
+}
+
+func (u *User) rotateRefreshToken() error {
+	refreshToken, err := jwt.Sign(nil, time.Hour*24*90)
+	if err != nil {
+		return appError.New(httpCode.InternalServerError, "Failed to rotate refresh token.", "")
+	}
+	u.RefreshToken = refreshToken
+	return nil
 }

@@ -32,10 +32,14 @@ func (s *UserService) SignUp(email, password, name string) (string, error) {
 	if err != nil {
 		return "", appError.Wrap(err)
 	}
+	accessToken, err := user.EncodeAccessToken()
+	if err != nil {
+		return "", appError.Wrap(err)
+	}
 
 	if err := s.userRepository.Save(user); err != nil {
 		return "", appError.Wrap(err)
 	}
 
-	return user.EncodeAccessToken()
+	return accessToken, nil
 }
