@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"runtime"
 
-	errorCode "banana-account-book.com/internal/libs/app-error/error-code"
+	httpCode "banana-account-book.com/internal/libs/http/code"
 )
 
 type applicationError struct {
@@ -14,7 +14,7 @@ type applicationError struct {
 	Stack         string
 }
 
-func New(msg string, code int, clientMsg string) *applicationError {
+func New(code int, msg, clientMsg string) *applicationError {
 	err := applicationError{
 		Message:       msg,
 		Code:          code,
@@ -54,7 +54,7 @@ func Wrap(err error) error {
 		return e.stackTrace()
 	}
 	// NOTE: Set status with 500 when error is not application error
-	return New(err.Error(), errorCode.Internal, "Internal Server Error").stackTrace()
+	return New(httpCode.InternalServerError, err.Error(), "Internal Server Error").stackTrace()
 }
 
 func UnWrap(err error) *applicationError {
@@ -62,5 +62,5 @@ func UnWrap(err error) *applicationError {
 		return e
 	}
 	// NOTE: Set status with 500 when error is not application error
-	return New(err.Error(), errorCode.Internal, "Internal Server Error").stackTrace()
+	return New(httpCode.InternalServerError, err.Error(), "Internal Server Error").stackTrace()
 }
