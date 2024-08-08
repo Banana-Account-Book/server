@@ -26,8 +26,11 @@ func (c *UserController) signUp(ctx *fiber.Ctx) error {
 	// 1. ctx destructuring
 	var dto dto.SignUpRequestBody
 	if err := ctx.BodyParser(&dto); err != nil {
-		// TODO: client error message 변경
-		return appError.New(httpCode.BadRequest, "Failed to parse request body", "")
+		return appError.New(httpCode.BadRequest, "Failed to parse request body", "Invalid Request body")
+	}
+
+	if err := appError.ValidateDto(dto); err != nil {
+		return err
 	}
 
 	// 2. call application service method

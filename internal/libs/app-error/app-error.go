@@ -23,7 +23,7 @@ func New(status httpCode.Status, msg, clientMsg string) *applicationError {
 		Message:       msg,
 		Code:          status.Code,
 		Stack:         fmt.Sprintf("Error: %s", msg),
-		ClientMessage: clientMsg,
+		ClientMessage: clientMessage,
 	}
 	return err.stackTrace()
 }
