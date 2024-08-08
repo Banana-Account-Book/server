@@ -30,17 +30,17 @@ func (u *User) TableName() string {
 func New(email, password, name string, providers []string) (*User, error) {
 	uuId, err := uuid.NewV7()
 	if err != nil {
-		return nil, appError.New(httpCode.InternalServerError, "Failed to create new user. Can not generate uuid.", "Internal Server Error")
+		return nil, appError.New(httpCode.InternalServerError, "Failed to create new user. Can not generate uuid.", "")
 	}
 
 	salt, err := strconv.Atoi(config.Salt)
 	if err != nil {
-		return nil, appError.New(httpCode.InternalServerError, "Failed to create new user. Can not convert salt to int.", "Internal Server Error")
+		return nil, appError.New(httpCode.InternalServerError, "Failed to create new user. Can not convert salt to int.", "")
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), salt)
 	if err != nil {
-		return nil, appError.New(httpCode.InternalServerError, "Failed to create new user. Can not hash password.", "Internal Server Error")
+		return nil, appError.New(httpCode.InternalServerError, "Failed to create new user. Can not hash password.", "")
 	}
 
 	user := &User{

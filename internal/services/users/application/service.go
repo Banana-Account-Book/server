@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	appError "banana-account-book.com/internal/libs/app-error"
+	httpCode "banana-account-book.com/internal/libs/http/code"
 	userModel "banana-account-book.com/internal/services/users/domain"
 	"banana-account-book.com/internal/services/users/infrastructure"
 )
@@ -21,7 +22,7 @@ func NewUserService(userRepository infrastructure.UserRepository) *UserService {
 func (s *UserService) SignUp(email, password, name string) error {
 	if _, ok, err := s.userRepository.FindByEmail(email); ok || err != nil {
 		if ok {
-			return appError.New(409, fmt.Sprintf("Email(%s) already exists", email), "Email already exists")
+			return appError.New(httpCode.Conflict, fmt.Sprintf("Email(%s) already exists", email), "Email already exists")
 		}
 		return appError.Wrap(err)
 	}

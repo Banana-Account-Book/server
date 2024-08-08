@@ -14,10 +14,14 @@ type applicationError struct {
 	Stack         string
 }
 
-func New(code int, msg, clientMsg string) *applicationError {
+func New(status httpCode.Status, msg, clientMsg string) *applicationError {
+	clientMessage := clientMsg
+	if clientMessage == "" {
+		clientMessage = status.Message
+	}
 	err := applicationError{
 		Message:       msg,
-		Code:          code,
+		Code:          status.Code,
 		Stack:         fmt.Sprintf("Error: %s", msg),
 		ClientMessage: clientMsg,
 	}
@@ -54,7 +58,7 @@ func Wrap(err error) error {
 		return e.stackTrace()
 	}
 	// NOTE: Set status with 500 when error is not application error
-	return New(httpCode.InternalServerError, err.Error(), "Internal Server Error").stackTrace()
+	return New(httpCode.InternalServerError, err.Error(), "").stackTrace()
 }
 
 func UnWrap(err error) *applicationError {
@@ -62,5 +66,5 @@ func UnWrap(err error) *applicationError {
 		return e
 	}
 	// NOTE: Set status with 500 when error is not application error
-	return New(httpCode.InternalServerError, err.Error(), "Internal Server Error").stackTrace()
+	return New(httpCode.InternalServerError, err.Error(), "").stackTrace()
 }
