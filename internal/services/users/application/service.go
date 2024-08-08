@@ -28,10 +28,14 @@ func (s *UserService) SignUp(email, password, name string) (string, error) {
 	}
 
 	user, err := userModel.New(email, password, name, []string{"local"})
+
 	if err != nil {
 		return "", appError.Wrap(err)
 	}
-	s.userRepository.Save(user)
+
+	if err := s.userRepository.Save(user); err != nil {
+		return "", appError.Wrap(err)
+	}
 
 	return user.EncodeAccessToken()
 }
