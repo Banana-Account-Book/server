@@ -6,7 +6,6 @@ CREATE TABLE "user" (
     "deletedAt" timestamptz,
     "id" UUID,
     "email" VARCHAR(50),
-    "password" VARCHAR(255),
     "name" VARCHAR(50),
     "providers" text[],
     "refreshToken" VARCHAR(255),
