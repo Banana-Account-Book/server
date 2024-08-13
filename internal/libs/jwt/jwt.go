@@ -32,3 +32,6 @@ func Sign(userId any, expiredAfter time.Duration) (string, error) {
 
 	return tokenString, nil
 }
+
+var AccessTokenExpiredAfter = time.Hour * 24
+var RefreshTokenExpiredAfter = time.Hour * 24 * 90

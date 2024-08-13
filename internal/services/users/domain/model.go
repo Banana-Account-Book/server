@@ -1,8 +1,6 @@
 package domain
 
 import (
-	"time"
-
 	appError "banana-account-book.com/internal/libs/app-error"
 	"banana-account-book.com/internal/libs/entity"
 	httpCode "banana-account-book.com/internal/libs/http/code"
@@ -49,7 +47,7 @@ func (u *User) EncodeAccessToken() (string, error) {
 	accessTokenChan := make(chan result, 1)
 	refreshTokenChan := make(chan error, 1)
 	go func() {
-		token, err := jwt.Sign(u.Id, time.Hour*24*7)
+		token, err := jwt.Sign(u.Id, jwt.AccessTokenExpiredAfter)
 		accessTokenChan <- result{token: token, err: err}
 	}()
 	go func() {
@@ -61,18 +59,18 @@ func (u *User) EncodeAccessToken() (string, error) {
 	refreshTokenErr := <-refreshTokenChan
 
 	if accessTokenResult.err != nil {
-		return "", appError.Wrap(accessTokenResult.err)
+		return "", appError.New(httpCode.Unauthorized, accessTokenResult.err.Error(), "")
 	}
 
 	if refreshTokenErr != nil {
-		return "", appError.Wrap(refreshTokenErr)
+		return "", appError.New(httpCode.Unauthorized, refreshTokenErr.Error(), "")
 	}
 
 	return accessTokenResult.token, nil
 }
 
 func (u *User) rotateRefreshToken() error {
-	refreshToken, err := jwt.Sign(nil, time.Hour*24*90)
+	refreshToken, err := jwt.Sign(nil, jwt.RefreshTokenExpiredAfter)
 	if err != nil {
 		return appError.New(httpCode.InternalServerError, "Failed to rotate refresh token.", "")
 	}

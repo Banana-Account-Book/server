@@ -4,6 +4,7 @@ import (
 	_ "banana-account-book.com/docs"
 
 	"banana-account-book.com/internal/libs/health"
+	authPresentation "banana-account-book.com/internal/services/auth/presentation"
 	userPresentation "banana-account-book.com/internal/services/users/presentation"
 	"github.com/gofiber/fiber/v2"
 )
@@ -16,9 +17,12 @@ import (
 // @license.name	Apache 2.0
 // @license.url	http://www.apache.org/licenses/LICENSE-2.0.html
 // @BasePath		/
-func Route(r *fiber.App, userController *userPresentation.UserController) {
+func Route(r *fiber.App, userController *userPresentation.UserController, authController *authPresentation.AuthController) {
 	health.Check(r)
 
 	userRoute := r.Group("/users")
 	userController.Route(userRoute)
+
+	authRoute := r.Group("/auth")
+	authController.Route(authRoute)
 }

@@ -1,8 +1,9 @@
-package appError
+package validate
 
 import (
 	"fmt"
 
+	appError "banana-account-book.com/internal/libs/app-error"
 	httpCode "banana-account-book.com/internal/libs/http/code"
 	"github.com/go-playground/validator"
 )
@@ -30,7 +31,7 @@ func ValidateDto(dto any) error {
 				message += fmt.Sprintf("%s\n", errorMsg)
 			}
 
-			return New(httpCode.BadRequest, message, message)
+			return appError.New(httpCode.BadRequest, message, message)
 		}
 	}
 	return nil
