@@ -14,7 +14,7 @@ func ErrorHandler(ctx *fiber.Ctx, err error) error {
 	//TODO: log error with something (e.g. Sentry, ELK, File, etc.)
 	fmt.Println(e.Stack)
 
-	return ctx.Status(e.Code).JSON(fiber.Map{
-		"data": e.ClientMessage,
-	})
+	errResponse := appError.ErrorResponse{Data: e.ClientMessage}
+
+	return ctx.Status(e.Code).JSON(errResponse)
 }

@@ -2,6 +2,16 @@ package config
 
 import "os"
 
+type OAuthProviderConfig struct {
+	ClientId     string
+	ClientSecret string
+	RedirectUri  string
+}
+
+type OauthConfig struct {
+	Kakao OAuthProviderConfig
+}
+
 var (
 	IsProduction = os.Getenv("APP_ENV") == "production"
 	Port         = os.Getenv("PORT")
@@ -11,4 +21,13 @@ var (
 	DbHost       = os.Getenv("DB_HOST")
 	DbPort       = os.Getenv("DB_PORT")
 	Origin       = os.Getenv("ORIGIN")
+	Salt         = os.Getenv("SALT")
+	SecretKey    = os.Getenv("SECRET_KEY")
+	Oauth        = OauthConfig{
+		Kakao: OAuthProviderConfig{
+			ClientId:     os.Getenv("KAKAO_CLIENT_ID"),
+			ClientSecret: os.Getenv("KAKAO_CLIENT_SECRET"),
+			RedirectUri:  os.Getenv("KAKAO_REDIRECT_URI"),
+		},
+	}
 )

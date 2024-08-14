@@ -1,4 +1,19 @@
 basePath: /
+definitions:
+  dto.OauthRequestBody:
+    properties:
+      code:
+        type: string
+    required:
+    - code
+    type: object
+  dto.OauthResponse:
+    properties:
+      accessToken:
+        type: string
+      expiredAt:
+        type: string
+    type: object
 info:
   contact:
     email: hch950627@naver.com
@@ -9,5 +24,66 @@ info:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   title: Banana Account Book API
   version: "1.0"
-paths: {}
+paths:
+  /auth/{provider}:
+    get:
+      consumes:
+      - application/json
+      description: 각 provider에 의한 Oauth 링크 반환
+      parameters:
+      - description: Authentication provider
+        in: path
+        name: provider
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved auth URL
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad request
+          schema: {}
+        "500":
+          description: Internal server error
+          schema: {}
+      summary: Get oauth link
+      tags:
+      - auth
+    post:
+      consumes:
+      - application/json
+      description: 각 provider에 의한 Oauth callback 로직
+      parameters:
+      - description: Authentication provider
+        in: path
+        name: provider
+        required: true
+        type: string
+      - description: Oauth code
+        in: body
+        name: code
+        required: true
+        schema:
+          $ref: '#/definitions/dto.OauthRequestBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved auth URL
+          schema:
+            $ref: '#/definitions/dto.OauthResponse'
+        "400":
+          description: Bad request
+          schema: {}
+        "500":
+          description: Internal server error
+          schema: {}
+      summary: oauth
+      tags:
+      - auth
 swagger: "2.0"
