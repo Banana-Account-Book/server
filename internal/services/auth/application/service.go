@@ -33,46 +33,49 @@ func (s *AuthService) GetAuthUrl(provider string) (string, error) {
 
 // TODO: refactoring
 func (s *AuthService) OAuth(code, provider string) (string, error) {
+	var userInfo *oauth.OauthInfo
+
 	if provider == "kakao" {
-		userInfo, err := s.kakaoClient.OAuth(code)
+		result, err := s.kakaoClient.OAuth(code)
 		if err != nil {
 			return "", appError.Wrap(err)
 		}
 
-		user, ok, err := s.userRepository.FindByEmail(userInfo.Email)
-		if err != nil {
-			return "", appError.Wrap(err)
-		}
-
-		accessToken := ""
-
-		if ok {
-			token, err := user.EncodeAccessToken()
-			if err != nil {
-				return "", appError.Wrap(err)
-			}
-			accessToken = token
-		} else {
-
-			newUser, err := userModel.New(userInfo.Email, userInfo.Name, []string{"kakao"})
-			if err != nil {
-				return "", appError.Wrap(err)
-			}
-
-			if err := s.userRepository.Save(newUser); err != nil {
-				return "", appError.Wrap(err)
-			}
-			token, err := newUser.EncodeAccessToken()
-
-			if err != nil {
-				return "", appError.Wrap(err)
-			}
-			accessToken = token
-		}
-
-		return accessToken, nil
+		userInfo = result
+	} else {
+		message := fmt.Sprintf("Invalid provider: %s", provider)
+		return "", appError.New(httpCode.BadRequest, message, message)
 	}
 
-	return "", appError.New(httpCode.BadRequest, fmt.Sprintf("Invalid provider: %s", provider), "")
+	user, ok, err := s.userRepository.FindByEmail(userInfo.Email)
+	if err != nil {
+		return "", appError.Wrap(err)
+	}
 
+	accessToken := ""
+
+	if ok {
+		token, err := user.EncodeAccessToken()
+		if err != nil {
+			return "", appError.Wrap(err)
+		}
+		accessToken = token
+	} else {
+		newUser, err := userModel.New(userInfo.Email, userInfo.Name, []string{"kakao"})
+		if err != nil {
+			return "", appError.Wrap(err)
+		}
+
+		if err := s.userRepository.Save(newUser); err != nil {
+			return "", appError.Wrap(err)
+		}
+		token, err := newUser.EncodeAccessToken()
+
+		if err != nil {
+			return "", appError.Wrap(err)
+		}
+		accessToken = token
+	}
+
+	return accessToken, nil
 }
