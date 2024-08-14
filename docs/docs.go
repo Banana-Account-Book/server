@@ -22,9 +22,9 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/users/signup": {
-            "post": {
-                "description": "Register a new user and return an access token",
+        "/auth/{provider}": {
+            "get": {
+                "description": "각 provider에 의한 Oauth 링크 반환",
                 "consumes": [
                     "application/json"
                 ],
@@ -32,80 +32,107 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "users"
+                    "auth"
                 ],
-                "summary": "User sign up",
+                "summary": "Get oauth link",
                 "parameters": [
                     {
-                        "description": "Sign up information",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.SignUpRequestBody"
-                        }
+                        "type": "string",
+                        "description": "Authentication provider",
+                        "name": "provider",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
-                    "201": {
-                        "description": "Returns access token",
+                    "200": {
+                        "description": "Successfully retrieved auth URL",
                         "schema": {
-                            "$ref": "#/definitions/dto.SignUpResponse"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
                     "400": {
                         "description": "Bad request",
-                        "schema": {
-                            "$ref": "#/definitions/appError.ErrorResponse"
-                        }
+                        "schema": {}
                     },
                     "500": {
                         "description": "Internal server error",
+                        "schema": {}
+                    }
+                }
+            },
+            "post": {
+                "description": "각 provider에 의한 Oauth callback 로직",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "oauth",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authentication provider",
+                        "name": "provider",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Oauth code",
+                        "name": "code",
+                        "in": "body",
+                        "required": true,
                         "schema": {
-                            "$ref": "#/definitions/appError.ErrorResponse"
+                            "$ref": "#/definitions/dto.OauthRequestBody"
                         }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved auth URL",
+                        "schema": {
+                            "$ref": "#/definitions/dto.OauthResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {}
                     }
                 }
             }
         }
     },
     "definitions": {
-        "appError.ErrorResponse": {
+        "dto.OauthRequestBody": {
             "type": "object",
+            "required": [
+                "code"
+            ],
             "properties": {
-                "data": {
+                "code": {
                     "type": "string"
                 }
             }
         },
-        "dto.SignUpRequestBody": {
-            "type": "object",
-            "required": [
-                "email",
-                "name",
-                "password"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string",
-                    "example": "hch950627@naver.com"
-                },
-                "name": {
-                    "type": "string",
-                    "example": "arthur"
-                },
-                "password": {
-                    "type": "string",
-                    "example": "q1w2e3r4!@"
-                }
-            }
-        },
-        "dto.SignUpResponse": {
+        "dto.OauthResponse": {
             "type": "object",
             "properties": {
                 "accessToken": {
-                    "type": "string",
-                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    "type": "string"
+                },
+                "expiredAt": {
+                    "type": "string"
                 }
             }
         }

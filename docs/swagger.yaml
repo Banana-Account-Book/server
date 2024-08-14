@@ -1,30 +1,17 @@
 basePath: /
 definitions:
-  appError.ErrorResponse:
+  dto.OauthRequestBody:
     properties:
-      data:
-        type: string
-    type: object
-  dto.SignUpRequestBody:
-    properties:
-      email:
-        example: hch950627@naver.com
-        type: string
-      name:
-        example: arthur
-        type: string
-      password:
-        example: q1w2e3r4!@
+      code:
         type: string
     required:
-    - email
-    - name
-    - password
+    - code
     type: object
-  dto.SignUpResponse:
+  dto.OauthResponse:
     properties:
       accessToken:
-        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+      expiredAt:
         type: string
     type: object
 info:
@@ -38,34 +25,65 @@ info:
   title: Banana Account Book API
   version: "1.0"
 paths:
-  /users/signup:
-    post:
+  /auth/{provider}:
+    get:
       consumes:
       - application/json
-      description: Register a new user and return an access token
+      description: 각 provider에 의한 Oauth 링크 반환
       parameters:
-      - description: Sign up information
-        in: body
-        name: request
+      - description: Authentication provider
+        in: path
+        name: provider
         required: true
-        schema:
-          $ref: '#/definitions/dto.SignUpRequestBody'
+        type: string
       produces:
       - application/json
       responses:
-        "201":
-          description: Returns access token
+        "200":
+          description: Successfully retrieved auth URL
           schema:
-            $ref: '#/definitions/dto.SignUpResponse'
+            additionalProperties:
+              type: string
+            type: object
         "400":
           description: Bad request
-          schema:
-            $ref: '#/definitions/appError.ErrorResponse'
+          schema: {}
         "500":
           description: Internal server error
-          schema:
-            $ref: '#/definitions/appError.ErrorResponse'
-      summary: User sign up
+          schema: {}
+      summary: Get oauth link
       tags:
-      - users
+      - auth
+    post:
+      consumes:
+      - application/json
+      description: 각 provider에 의한 Oauth callback 로직
+      parameters:
+      - description: Authentication provider
+        in: path
+        name: provider
+        required: true
+        type: string
+      - description: Oauth code
+        in: body
+        name: code
+        required: true
+        schema:
+          $ref: '#/definitions/dto.OauthRequestBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved auth URL
+          schema:
+            $ref: '#/definitions/dto.OauthResponse'
+        "400":
+          description: Bad request
+          schema: {}
+        "500":
+          description: Internal server error
+          schema: {}
+      summary: oauth
+      tags:
+      - auth
 swagger: "2.0"
