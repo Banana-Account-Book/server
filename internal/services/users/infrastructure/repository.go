@@ -10,8 +10,8 @@ import (
 )
 
 type UserRepository interface {
-	FindByEmail(email string) (*domain.User, bool, error)
-	Save(user *domain.User) error
+	FindByEmail(db *gorm.DB, email string) (*domain.User, bool, error)
+	Save(db *gorm.DB, user *domain.User) error
 }
 
 type UserRepositoryImpl struct {
@@ -22,9 +22,13 @@ func NewRepository(manager *gorm.DB) UserRepository {
 	return &UserRepositoryImpl{manager: manager}
 }
 
-func (r *UserRepositoryImpl) FindByEmail(email string) (*domain.User, bool, error) {
+func (r *UserRepositoryImpl) FindByEmail(db *gorm.DB, email string) (*domain.User, bool, error) {
+	if db == nil {
+		db = r.manager
+	}
+
 	users := []domain.User{}
-	if err := r.manager.Where("email = ?", email).Find(&users).Error; err != nil {
+	if err := db.Where("email = ?", email).Find(&users).Error; err != nil {
 		return nil, false, appError.New(httpCode.InternalServerError, fmt.Sprintf("Failed to findByEmail user. %s", err.Error()), "")
 	}
 	if len(users) == 0 {
@@ -33,8 +37,12 @@ func (r *UserRepositoryImpl) FindByEmail(email string) (*domain.User, bool, erro
 	return &users[0], true, nil
 }
 
-func (r *UserRepositoryImpl) Save(user *domain.User) error {
-	if err := r.manager.Save(user).Error; err != nil {
+func (r *UserRepositoryImpl) Save(db *gorm.DB, user *domain.User) error {
+	if db == nil {
+		db = r.manager
+	}
+
+	if err := db.Save(user).Error; err != nil {
 		return appError.New(httpCode.InternalServerError, fmt.Sprintf("Failed to save user. %s", err.Error()), "")
 	}
 	return nil
