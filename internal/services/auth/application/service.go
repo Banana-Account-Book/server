@@ -31,7 +31,6 @@ func (s *AuthService) GetAuthUrl(provider string) (string, error) {
 
 }
 
-// TODO: refactoring
 func (s *AuthService) OAuth(code, provider string) (string, error) {
 	var userInfo *oauth.OauthInfo
 
