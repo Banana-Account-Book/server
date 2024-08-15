@@ -14,13 +14,15 @@ import (
 type AuthService struct {
 	userRepository userInfra.UserRepository
 	kakaoClient    *oauth.KakaoClient
+	naverClient    *oauth.NaverClient
 	db             *gorm.DB
 }
 
-func NewAuthService(userRepository userInfra.UserRepository, kakaoClient *oauth.KakaoClient, db *gorm.DB) *AuthService {
+func NewAuthService(userRepository userInfra.UserRepository, kakaoClient *oauth.KakaoClient, naverClient *oauth.NaverClient, db *gorm.DB) *AuthService {
 	return &AuthService{
 		userRepository: userRepository,
 		kakaoClient:    kakaoClient,
+		naverClient:    naverClient,
 		db:             db,
 	}
 }
@@ -28,6 +30,9 @@ func NewAuthService(userRepository userInfra.UserRepository, kakaoClient *oauth.
 func (s *AuthService) GetAuthUrl(provider string) (string, error) {
 	if provider == "kakao" {
 		return s.kakaoClient.GetUrl(), nil
+	}
+	if provider == "naver" {
+		return s.naverClient.GetUrl(), nil
 	}
 
 	return "", appError.New(httpCode.BadRequest, fmt.Sprintf("Invalid provider: %s", provider), "")
@@ -68,6 +73,8 @@ func (s *AuthService) getOAuthInfo(provider, code string) (*oauth.OauthInfo, err
 	switch provider {
 	case "kakao":
 		return s.kakaoClient.OAuth(code)
+	case "naver":
+		return s.naverClient.OAuth(code)
 	default:
 		message := fmt.Sprintf("Invalid provider: %s", provider)
 		return nil, appError.New(httpCode.BadRequest, message, message)

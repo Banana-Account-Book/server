@@ -10,6 +10,7 @@ type OAuthProviderConfig struct {
 
 type OauthConfig struct {
 	Kakao OAuthProviderConfig
+	Naver OAuthProviderConfig
 }
 
 var (
@@ -28,6 +29,11 @@ var (
 			ClientId:     os.Getenv("KAKAO_CLIENT_ID"),
 			ClientSecret: os.Getenv("KAKAO_CLIENT_SECRET"),
 			RedirectUri:  os.Getenv("KAKAO_REDIRECT_URI"),
+		},
+		Naver: OAuthProviderConfig{
+			ClientId:     os.Getenv("NAVER_CLIENT_ID"),
+			ClientSecret: os.Getenv("NAVER_CLIENT_SECRET"),
+			RedirectUri:  os.Getenv("NAVER_REDIRECT_URI"),
 		},
 	}
 )
