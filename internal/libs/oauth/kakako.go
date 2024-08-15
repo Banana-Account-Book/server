@@ -32,7 +32,7 @@ type kakaoResult struct {
 }
 
 func (c *KakaoClient) GetUrl() string {
-	baseURL := "https://kauth.kakao.com/oauth/authorize"
+	baseURL := config.Oauth.Kakao.BaseURL + "/authorize"
 	params := url.Values{}
 	params.Add("client_id", config.Oauth.Kakao.ClientId)
 	params.Add("redirect_uri", config.Oauth.Kakao.RedirectUri)
@@ -51,7 +51,7 @@ func (c *KakaoClient) OAuth(code string) (*OauthInfo, error) {
 	data.Set("redirect_uri", config.Oauth.Kakao.RedirectUri)
 	data.Set("code", code)
 
-	res, err := c.httpClient.Post("https://kauth.kakao.com/oauth/token", "application/x-www-form-urlencoded", bytes.NewBufferString(data.Encode()))
+	res, err := c.httpClient.Post(config.Oauth.Kakao.BaseURL+"/token", "application/x-www-form-urlencoded", bytes.NewBufferString(data.Encode()))
 	if err != nil {
 		return nil, appError.New(httpCode.InternalServerError, fmt.Sprintf("Failed to request kakao oauth token, %v", err), "")
 	}

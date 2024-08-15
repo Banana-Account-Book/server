@@ -30,7 +30,7 @@ type naverResult struct {
 }
 
 func (c *NaverClient) GetUrl() string {
-	baseURL := "https://nid.naver.com/oauth2.0/authorize"
+	baseURL := config.Oauth.Naver.BaseURL + "/authorize"
 	params := url.Values{}
 	params.Add("client_id", config.Oauth.Naver.ClientId)
 	params.Add("redirect_uri", config.Oauth.Naver.RedirectUri)
@@ -50,7 +50,7 @@ func (c *NaverClient) OAuth(code string) (*OauthInfo, error) {
 	data.Set("state", "banana-account-book")
 	data.Set("code", code)
 
-	res, err := c.httpClient.Post("https://nid.naver.com/oauth2.0/token", "application/x-www-form-urlencoded", bytes.NewBufferString(data.Encode()))
+	res, err := c.httpClient.Post(config.Oauth.Naver.BaseURL+"/token", "application/x-www-form-urlencoded", bytes.NewBufferString(data.Encode()))
 	if err != nil {
 		return nil, appError.New(httpCode.InternalServerError, fmt.Sprintf("Failed to request kakao oauth token, %v", err), "")
 	}
