@@ -1,11 +1,8 @@
 package presentation
 
 import (
-	"time"
-
 	appError "banana-account-book.com/internal/libs/app-error"
 	httpCode "banana-account-book.com/internal/libs/http/code"
-	"banana-account-book.com/internal/libs/jwt"
 	"banana-account-book.com/internal/libs/validate"
 	"banana-account-book.com/internal/services/auth/application"
 	"banana-account-book.com/internal/services/auth/dto"
@@ -74,18 +71,13 @@ func (c *AuthController) Callback(ctx *fiber.Ctx) error {
 		return appError.New(httpCode.BadRequest, "Invalid request body", "")
 	}
 
-	accessToken, err := c.authService.OAuth(body.Code, provider)
+	result, err := c.authService.OAuth(body.Code, provider)
 	if err != nil {
 		return appError.Wrap(err)
 	}
 
 	if err := validate.ValidateDto(body); err != nil {
 		return appError.Wrap(err)
-	}
-
-	result := dto.OauthResponse{
-		AccessToken: accessToken,
-		ExpiredAt:   time.Now().Add(jwt.AccessTokenExpiredAfter),
 	}
 
 	return ctx.Status(httpCode.Ok.Code).JSON(result)

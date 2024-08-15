@@ -2,10 +2,13 @@ package application
 
 import (
 	"fmt"
+	"time"
 
 	appError "banana-account-book.com/internal/libs/app-error"
 	httpCode "banana-account-book.com/internal/libs/http/code"
+	"banana-account-book.com/internal/libs/jwt"
 	"banana-account-book.com/internal/libs/oauth"
+	"banana-account-book.com/internal/services/auth/dto"
 	userModel "banana-account-book.com/internal/services/users/domain"
 	userInfra "banana-account-book.com/internal/services/users/infrastructure"
 	"gorm.io/gorm"
@@ -49,9 +52,9 @@ func (s *AuthService) GetAuthUrl(provider string) (string, error) {
 	}
 }
 
-func (s *AuthService) OAuth(code, provider string) (string, error) {
+func (s *AuthService) OAuth(code, provider string) (*dto.OauthResponse, error) {
 	var (
-		accessToken string
+		responseDto *dto.OauthResponse
 		userInfo    *oauth.OauthInfo
 		err         error
 	)
@@ -64,7 +67,7 @@ func (s *AuthService) OAuth(code, provider string) (string, error) {
 		}
 
 		// 유저 정보를 찾고, 없다면 생성 후 토큰 발행
-		accessToken, err = s.generateAccessToken(tx, userInfo)
+		responseDto, err = s.generateAccessToken(tx, userInfo, provider)
 		if err != nil {
 			return appError.Wrap(err)
 		}
@@ -73,10 +76,10 @@ func (s *AuthService) OAuth(code, provider string) (string, error) {
 	})
 
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return accessToken, nil
+	return responseDto, nil
 }
 
 func (s *AuthService) getOAuthInfo(provider, code string) (*oauth.OauthInfo, error) {
@@ -93,24 +96,30 @@ func (s *AuthService) getOAuthInfo(provider, code string) (*oauth.OauthInfo, err
 	}
 }
 
-func (s *AuthService) generateAccessToken(tx *gorm.DB, userInfo *oauth.OauthInfo) (string, error) {
+func (s *AuthService) generateAccessToken(tx *gorm.DB, userInfo *oauth.OauthInfo, provider string) (*dto.OauthResponse, error) {
+	sync := false
 	user, exists, err := s.userRepository.FindByEmail(tx, userInfo.Email)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	if exists {
-		return user.EncodeAccessToken()
+		if !user.HasProvider(provider) {
+			user.AddProvider(provider)
+			sync = true
+		}
+	} else {
+		user, err = userModel.New(userInfo.Email, userInfo.Name, []string{provider})
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	newUser, err := userModel.New(userInfo.Email, userInfo.Name, []string{"kakao"})
-	if err != nil {
-		return "", err
+	accessToken, err := user.EncodeAccessToken()
+
+	if err := s.userRepository.Save(tx, user); err != nil {
+		return nil, err
 	}
 
-	if err := s.userRepository.Save(tx, newUser); err != nil {
-		return "", err
-	}
-
-	return newUser.EncodeAccessToken()
+	return &dto.OauthResponse{AccessToken: accessToken, Sync: sync, ExpiredAt: time.Now().Add(jwt.AccessTokenExpiredAfter)}, err
 }

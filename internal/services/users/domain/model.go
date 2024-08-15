@@ -77,3 +77,16 @@ func (u *User) rotateRefreshToken() error {
 	u.RefreshToken = refreshToken
 	return nil
 }
+
+func (u *User) HasProvider(provider string) bool {
+	for _, p := range u.Providers {
+		if p == provider {
+			return true
+		}
+	}
+	return false
+}
+
+func (u *User) AddProvider(provider string) {
+	u.Providers = append(u.Providers, provider)
+}
