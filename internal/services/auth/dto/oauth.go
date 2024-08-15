@@ -9,4 +9,5 @@ type OauthRequestBody struct {
 type OauthResponse struct {
 	AccessToken string    `json:"accessToken"`
 	ExpiredAt   time.Time `json:"expiredAt"`
+	Sync        bool      `json:"sync"`
 }
