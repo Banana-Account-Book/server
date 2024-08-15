@@ -10,8 +10,9 @@ type OAuthProviderConfig struct {
 }
 
 type OauthConfig struct {
-	Kakao OAuthProviderConfig
-	Naver OAuthProviderConfig
+	Kakao  OAuthProviderConfig
+	Naver  OAuthProviderConfig
+	Google OAuthProviderConfig
 }
 
 var (
@@ -37,6 +38,12 @@ var (
 			ClientId:     os.Getenv("NAVER_CLIENT_ID"),
 			ClientSecret: os.Getenv("NAVER_CLIENT_SECRET"),
 			RedirectUri:  os.Getenv("NAVER_REDIRECT_URI"),
+		},
+		Google: OAuthProviderConfig{
+			BaseURL:      "https://accounts.google.com/o/oauth2",
+			ClientId:     os.Getenv("GOOGLE_CLIENT_ID"),
+			ClientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
+			RedirectUri:  os.Getenv("GOOGLE_REDIRECT_URI"),
 		},
 	}
 )
