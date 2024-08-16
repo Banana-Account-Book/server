@@ -133,6 +133,9 @@ const docTemplate = `{
                 },
                 "expiredAt": {
                     "type": "string"
+                },
+                "sync": {
+                    "type": "boolean"
                 }
             }
         }

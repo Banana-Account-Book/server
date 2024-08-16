@@ -13,6 +13,8 @@ definitions:
         type: string
       expiredAt:
         type: string
+      sync:
+        type: boolean
     type: object
 info:
   contact:
