@@ -9,12 +9,12 @@ import (
 	httpCode "banana-account-book.com/internal/libs/http/code"
 )
 
-type KakaoClient struct {
+type kakaoClient struct {
 	config oauthConfig
 }
 
-func NewKakaoClient() *KakaoClient {
-	return &KakaoClient{config: oauthConfig{
+func newKakaoClient() *kakaoClient {
+	return &kakaoClient{config: oauthConfig{
 		authURL:      config.Oauth.Kakao.BaseURL + "/authorize",
 		tokenURL:     config.Oauth.Kakao.BaseURL + "/token",
 		userInfoURL:  "https://kapi.kakao.com/v2/user/me",
@@ -24,7 +24,7 @@ func NewKakaoClient() *KakaoClient {
 	}}
 }
 
-func (c *KakaoClient) parseUserInfo(body []byte) (*OauthInfo, error) {
+func (c *kakaoClient) parseUserInfo(body []byte) (*OauthInfo, error) {
 	var result struct {
 		KakaoAccount struct {
 			Profile struct {
@@ -48,6 +48,6 @@ func (c *KakaoClient) parseUserInfo(body []byte) (*OauthInfo, error) {
 	return &userInfo, nil
 }
 
-func (c *KakaoClient) getConfig() oauthConfig {
+func (c *kakaoClient) getConfig() oauthConfig {
 	return c.config
 }

@@ -9,12 +9,12 @@ import (
 	httpCode "banana-account-book.com/internal/libs/http/code"
 )
 
-type GoogleClient struct {
+type googleClient struct {
 	config oauthConfig
 }
 
-func NewGoogleClient() *GoogleClient {
-	return &GoogleClient{config: oauthConfig{
+func newGoogleClient() *googleClient {
+	return &googleClient{config: oauthConfig{
 		authURL:      "https://accounts.google.com/o/oauth2/auth",
 		tokenURL:     "https://oauth2.googleapis.com/token",
 		userInfoURL:  "https://www.googleapis.com/oauth2/v2/userinfo",
@@ -26,7 +26,7 @@ func NewGoogleClient() *GoogleClient {
 	}}
 }
 
-func (c *GoogleClient) parseUserInfo(body []byte) (*OauthInfo, error) {
+func (c *googleClient) parseUserInfo(body []byte) (*OauthInfo, error) {
 	var result struct {
 		Email   string `json:"email"`
 		Name    string `json:"name"`
@@ -46,6 +46,6 @@ func (c *GoogleClient) parseUserInfo(body []byte) (*OauthInfo, error) {
 	return &userInfo, nil
 }
 
-func (c *GoogleClient) getConfig() oauthConfig {
+func (c *googleClient) getConfig() oauthConfig {
 	return c.config
 }

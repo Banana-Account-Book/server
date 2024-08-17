@@ -9,12 +9,12 @@ import (
 	httpCode "banana-account-book.com/internal/libs/http/code"
 )
 
-type NaverClient struct {
+type naverClient struct {
 	config oauthConfig
 }
 
-func NewNaverClient() *NaverClient {
-	return &NaverClient{config: oauthConfig{
+func newNaverClient() *naverClient {
+	return &naverClient{config: oauthConfig{
 		authURL:      config.Oauth.Naver.BaseURL + "/authorize",
 		tokenURL:     config.Oauth.Naver.BaseURL + "/token",
 		userInfoURL:  "https://openapi.naver.com/v1/nid/me",
@@ -25,7 +25,7 @@ func NewNaverClient() *NaverClient {
 	}}
 }
 
-func (c *NaverClient) parseUserInfo(body []byte) (*OauthInfo, error) {
+func (c *naverClient) parseUserInfo(body []byte) (*OauthInfo, error) {
 	var result struct {
 		Response struct {
 			Email        string `json:"email"`
@@ -47,6 +47,6 @@ func (c *NaverClient) parseUserInfo(body []byte) (*OauthInfo, error) {
 	return &userInfo, nil
 }
 
-func (c *NaverClient) getConfig() oauthConfig {
+func (c *naverClient) getConfig() oauthConfig {
 	return c.config
 }
