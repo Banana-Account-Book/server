@@ -6,7 +6,7 @@ import (
 	appError "banana-account-book.com/internal/libs/app-error"
 	"banana-account-book.com/internal/libs/jwt"
 	"banana-account-book.com/internal/libs/oauth"
-	"banana-account-book.com/internal/services/auth/dto"
+	dto "banana-account-book.com/internal/services/auth/dto/_provider"
 	userModel "banana-account-book.com/internal/services/users/domain"
 	userInfra "banana-account-book.com/internal/services/users/infrastructure"
 	"gorm.io/gorm"
