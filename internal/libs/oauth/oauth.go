@@ -42,9 +42,9 @@ type OAuthProvider struct {
 func NewOAuthProvider() *OAuthProvider {
 	return &OAuthProvider{
 		clients: map[string]oauthClient{
-			"google": NewGoogleClient(),
-			"kakao":  NewKakaoClient(),
-			"naver":  NewNaverClient()},
+			"google": newGoogleClient(),
+			"kakao":  newKakaoClient(),
+			"naver":  newNaverClient()},
 		httpClient: &http.Client{},
 	}
 }
