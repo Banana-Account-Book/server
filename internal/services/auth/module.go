@@ -8,9 +8,7 @@ import (
 )
 
 var Module = fx.Module("auth",
-	fx.Provide(oauth.NewKakaoClient),
-	fx.Provide(oauth.NewNaverClient),
-	fx.Provide(oauth.NewGoogleClient),
+	fx.Provide(oauth.NewOAuthProvider),
 	fx.Provide(application.NewAuthService),
 	fx.Provide(presentation.NewAuthController),
 )
