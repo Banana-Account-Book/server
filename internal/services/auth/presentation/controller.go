@@ -5,7 +5,7 @@ import (
 	httpCode "banana-account-book.com/internal/libs/http/code"
 	"banana-account-book.com/internal/libs/validate"
 	"banana-account-book.com/internal/services/auth/application"
-	"banana-account-book.com/internal/services/auth/dto"
+	dto "banana-account-book.com/internal/services/auth/dto/_provider"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -37,10 +37,14 @@ func (c *AuthController) Route(r fiber.Router) {
 // @Router /auth/{provider} [get]
 func (c *AuthController) GetLink(ctx *fiber.Ctx) error {
 	// 1. ctx destructuring
-	provider := ctx.Params("provider")
+	param := dto.RequestParam{Provider: ctx.Params("provider")}
+
+	if err := validate.ValidateDto(param); err != nil {
+		return appError.Wrap(err)
+	}
 
 	// 2. call application service method
-	url, err := c.authService.GetAuthUrl(provider)
+	url, err := c.authService.GetAuthUrl(param.Provider)
 	if err != nil {
 		return appError.Wrap(err)
 	}
@@ -63,7 +67,7 @@ func (c *AuthController) GetLink(ctx *fiber.Ctx) error {
 // @Router /auth/{provider} [post]
 func (c *AuthController) Callback(ctx *fiber.Ctx) error {
 	// 1. ctx destructuring
-	provider := ctx.Params("provider")
+	param := dto.RequestParam{Provider: ctx.Params("provider")}
 	var body dto.OauthRequestBody
 
 	// 2. parse request body
@@ -71,7 +75,7 @@ func (c *AuthController) Callback(ctx *fiber.Ctx) error {
 		return appError.New(httpCode.BadRequest, "Invalid request body", "")
 	}
 
-	result, err := c.authService.OAuth(body.Code, provider)
+	result, err := c.authService.OAuth(body.Code, param.Provider)
 	if err != nil {
 		return appError.Wrap(err)
 	}

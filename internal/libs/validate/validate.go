@@ -26,6 +26,12 @@ func ValidateDto(dto any) error {
 					errorMsg = fmt.Sprintf("%s는(은) 반드시 %s보다 크거나 같아야 합니다.", err.Field(), err.Param())
 				case "lte":
 					errorMsg = fmt.Sprintf("%s는(은) 반드시 %s보다 작거나 같아야 합니다.", err.Field(), err.Param())
+				case "oneof":
+					words := strings.Fields(err.Param())
+					for i, word := range words {
+						words[i] = "'" + word + "'"
+					}
+					errorMsg = fmt.Sprintf("%s는(은) 반드시 %s 중 하나여야 합니다.", err.Field(), strings.Join(words, ", "))
 				default:
 					errorMsg = fmt.Sprintf("%s는(은) 유효하지 않은 값입니다.", err.Field())
 				}

@@ -93,4 +93,19 @@ func TestAccount(t *testing.T) {
 			assert.Equal(t, "Required는(은) 필수 값입니다.\nEmail는(은) 반드시 이메일 형식이어야 합니다.", err.Error())
 		})
 	})
+	t.Run("oneof 테스트", func(t *testing.T) {
+		t.Run("허용되지 않는 값이라면 에러를 반환한다.", func(t *testing.T) {
+			type OneOfTest struct {
+				OneOf string `validate:"oneof=google kakao naver"`
+			}
+
+			oneOfTest := OneOfTest{
+				OneOf: "facebook",
+			}
+
+			err := validate.ValidateDto(oneOfTest)
+			assert.NotNil(t, err)
+			assert.Equal(t, "OneOf는(은) 반드시 'google', 'kakao', 'naver' 중 하나여야 합니다.", err.Error())
+		})
+	})
 }
