@@ -112,7 +112,7 @@ func (s *AuthService) generateAccessToken(tx *gorm.DB, userInfo *oauth.OauthInfo
 	return &dto.OauthResponse{AccessToken: accessToken, Sync: sync, ExpiredAt: time.Now().Add(jwt.AccessTokenExpiredAfter)}, err
 }
 
-// 사용자의 계좌를 생성 TODO: 이벤트 소싱으로 변경
+// TODO: 이벤트 소싱으로 변경
 func (s *AuthService) createAccountBook(tx *gorm.DB, user *userModel.User) error {
 	accountBook, err := accountModel.New(user.Id, fmt.Sprintf("%s의 가계부", user.Name))
 
@@ -124,7 +124,6 @@ func (s *AuthService) createAccountBook(tx *gorm.DB, user *userModel.User) error
 		return err
 	}
 
-	// 사용자의 계좌를 생성 TODO: 이벤트 소싱으로 변경
 	role, err := roleModel.New(user.Id, accountBook.Id, "owner")
 	if err != nil {
 		return err
