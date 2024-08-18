@@ -12,9 +12,9 @@ import (
 type User struct {
 	ddd.SoftDeletableAggregate
 	Id           uuid.UUID      `json:"id" gorm:"primaryKey; type:uuid"`
-	Email        string         `json:"email" gorm:"unique;type:varchar(50)"`
-	Name         string         `json:"name" gorm:"type:varchar(50)"`
-	Providers    pq.StringArray `json:"providers" gorm:"type:text[];"`
+	Email        string         `json:"email" gorm:"unique;type:varchar(50); not null;"`
+	Name         string         `json:"name" gorm:"type:varchar(50); not null;"`
+	Providers    pq.StringArray `json:"providers" gorm:"type:text[];not null;"`
 	RefreshToken string         `json:"refreshToken" gorm:"column:refreshToken;type:varchar(255)"`
 }
 

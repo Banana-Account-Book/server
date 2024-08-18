@@ -5,6 +5,7 @@ import (
 	"banana-account-book.com/internal/libs/db"
 	"banana-account-book.com/internal/services/accountBooks"
 	"banana-account-book.com/internal/services/auth"
+	"banana-account-book.com/internal/services/roles"
 	"banana-account-book.com/internal/services/users"
 	"go.uber.org/fx"
 	"gorm.io/gorm"
@@ -17,6 +18,7 @@ func main() {
 		users.Module,
 		auth.Module,
 		accountBooks.Module,
+		roles.Module,
 		fx.Invoke(func(*app.App) {}),
 		fx.Invoke(func(*gorm.DB) {}),
 	).Run()

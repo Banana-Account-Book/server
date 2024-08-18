@@ -8,8 +8,8 @@ import (
 type AccountBook struct {
 	ddd.SoftDeletableAggregate
 	Id     uuid.UUID `json:"id" gorm:"primaryKey; type:uuid; column:id"`
-	UserId uuid.UUID `json:"userId" gorm:"type:uuid; column:userId"`
-	Name   string    `json:"name" gorm:"type:varchar(50); column:name"`
+	UserId uuid.UUID `json:"userId" gorm:"type:uuid; column:userId; not null;"`
+	Name   string    `json:"name" gorm:"type:varchar(50); column:name; not null;"`
 }
 
 func (a *AccountBook) TableName() string {

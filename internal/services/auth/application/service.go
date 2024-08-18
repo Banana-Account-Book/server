@@ -10,6 +10,8 @@ import (
 	accountModel "banana-account-book.com/internal/services/accountBooks/domain"
 	accountBookInfra "banana-account-book.com/internal/services/accountBooks/infrastructure"
 	dto "banana-account-book.com/internal/services/auth/dto/_provider"
+	roleModel "banana-account-book.com/internal/services/roles/domain"
+	roleInfra "banana-account-book.com/internal/services/roles/infrastructure"
 	userModel "banana-account-book.com/internal/services/users/domain"
 	userInfra "banana-account-book.com/internal/services/users/infrastructure"
 	"gorm.io/gorm"
@@ -18,6 +20,7 @@ import (
 type AuthService struct {
 	userRepository        userInfra.UserRepository
 	accountBookRepository accountBookInfra.AccountBookRepository
+	roleRepository        roleInfra.RoleRepository
 	oauthProvider         *oauth.OAuthProvider
 	db                    *gorm.DB
 }
@@ -25,6 +28,7 @@ type AuthService struct {
 func NewAuthService(
 	userRepository userInfra.UserRepository,
 	accountBookRepository accountBookInfra.AccountBookRepository,
+	roleRepository roleInfra.RoleRepository,
 	oauthProvider *oauth.OAuthProvider,
 	db *gorm.DB,
 ) *AuthService {
@@ -33,6 +37,7 @@ func NewAuthService(
 		oauthProvider:         oauthProvider,
 		db:                    db,
 		accountBookRepository: accountBookRepository,
+		roleRepository:        roleRepository,
 	}
 }
 
@@ -49,8 +54,6 @@ func (s *AuthService) OAuth(code, provider string) (*dto.OauthResponse, error) {
 	var (
 		responseDto *dto.OauthResponse
 		userInfo    *oauth.OauthInfo
-		user        *userModel.User
-		accountBook *accountModel.AccountBook
 		err         error
 	)
 
@@ -61,28 +64,9 @@ func (s *AuthService) OAuth(code, provider string) (*dto.OauthResponse, error) {
 		}
 
 		// 유저 정보를 찾고, 없다면 생성 후 토큰 발행
-		responseDto, user, err = s.generateAccessToken(tx, userInfo, provider)
+		responseDto, err = s.generateAccessToken(tx, userInfo, provider)
 		if err != nil {
 			return appError.Wrap(err)
-		}
-
-		_, exists, err := s.accountBookRepository.FindByUserId(tx, user.Id)
-
-		if err != nil {
-			return appError.Wrap(err)
-		}
-
-		if !exists {
-			// 사용자의 계좌를 생성 TODO: 이벤트 소싱으로 변경
-			accountBook, err = accountModel.New(user.Id, fmt.Sprintf("%s의 가계부", user.Name))
-
-			if err != nil {
-				return appError.Wrap(err)
-			}
-
-			if err := s.accountBookRepository.Save(tx, accountBook); err != nil {
-				return appError.Wrap(err)
-			}
 		}
 
 		return nil
@@ -95,11 +79,11 @@ func (s *AuthService) OAuth(code, provider string) (*dto.OauthResponse, error) {
 	return responseDto, nil
 }
 
-func (s *AuthService) generateAccessToken(tx *gorm.DB, userInfo *oauth.OauthInfo, provider string) (*dto.OauthResponse, *userModel.User, error) {
+func (s *AuthService) generateAccessToken(tx *gorm.DB, userInfo *oauth.OauthInfo, provider string) (*dto.OauthResponse, error) {
 	sync := false
 	user, exists, err := s.userRepository.FindByEmail(tx, userInfo.Email)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	if exists {
@@ -110,15 +94,45 @@ func (s *AuthService) generateAccessToken(tx *gorm.DB, userInfo *oauth.OauthInfo
 	} else {
 		user, err = userModel.New(userInfo.Email, userInfo.Name, []string{provider})
 		if err != nil {
-			return nil, nil, err
+			return nil, err
+		}
+
+		err = s.createAccountBook(tx, user)
+		if err != nil {
+			return nil, err
 		}
 	}
 
 	accessToken, err := user.EncodeAccessToken()
 
 	if err := s.userRepository.Save(tx, user); err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return &dto.OauthResponse{AccessToken: accessToken, Sync: sync, ExpiredAt: time.Now().Add(jwt.AccessTokenExpiredAfter)}, user, err
+	return &dto.OauthResponse{AccessToken: accessToken, Sync: sync, ExpiredAt: time.Now().Add(jwt.AccessTokenExpiredAfter)}, err
+}
+
+// 사용자의 계좌를 생성 TODO: 이벤트 소싱으로 변경
+func (s *AuthService) createAccountBook(tx *gorm.DB, user *userModel.User) error {
+	accountBook, err := accountModel.New(user.Id, fmt.Sprintf("%s의 가계부", user.Name))
+
+	if err != nil {
+		return err
+	}
+
+	if err := s.accountBookRepository.Save(tx, accountBook); err != nil {
+		return err
+	}
+
+	// 사용자의 계좌를 생성 TODO: 이벤트 소싱으로 변경
+	role, err := roleModel.New(user.Id, accountBook.Id, "owner")
+	if err != nil {
+		return err
+	}
+
+	if err := s.roleRepository.Save(tx, role); err != nil {
+		return err
+	}
+
+	return err
 }

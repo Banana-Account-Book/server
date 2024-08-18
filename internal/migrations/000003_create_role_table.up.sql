@@ -1,13 +1,13 @@
 BEGIN;
 
-CREATE TABLE "account" (
+CREATE TABLE "role" (
     "createdAt" timestamptz,
     "updatedAt" timestamptz,
     "deletedAt" timestamptz,
-    "id" UUID,
+    "id" SERIAL PRIMARY KEY,
     "userId" UUID NOT NULL,
-    "name" VARCHAR(50) NOT NULL,
-    PRIMARY KEY ("id")
+    "accountBookId" UUID NOT NULL,
+    "type" VARCHAR(20) NOT NULL
 );
 
 COMMIT;

@@ -41,7 +41,7 @@ func (r *AccountBookRepositoryImpl) FindByUserId(db *gorm.DB, userId uuid.UUID) 
 
 	accountBooks := []*domain.AccountBook{}
 	if err := db.Where("'userId' = ?", userId).Find(&accountBooks).Error; err != nil {
-		return nil, false, appError.New(httpCode.InternalServerError, fmt.Sprintf("Failed to findByUserId user. %s", err.Error()), "")
+		return nil, false, appError.New(httpCode.InternalServerError, fmt.Sprintf("Failed to findByUserId account books. %s", err.Error()), "")
 	}
 	if len(accountBooks) == 0 {
 		return nil, false, nil
