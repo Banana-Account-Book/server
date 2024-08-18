@@ -1,11 +1,14 @@
 package application
 
 import (
+	"fmt"
 	"time"
 
 	appError "banana-account-book.com/internal/libs/app-error"
 	"banana-account-book.com/internal/libs/jwt"
 	"banana-account-book.com/internal/libs/oauth"
+	accountModel "banana-account-book.com/internal/services/accountBooks/domain"
+	accountBookInfra "banana-account-book.com/internal/services/accountBooks/infrastructure"
 	dto "banana-account-book.com/internal/services/auth/dto/_provider"
 	userModel "banana-account-book.com/internal/services/users/domain"
 	userInfra "banana-account-book.com/internal/services/users/infrastructure"
@@ -13,20 +16,23 @@ import (
 )
 
 type AuthService struct {
-	userRepository userInfra.UserRepository
-	oauthProvider  *oauth.OAuthProvider
-	db             *gorm.DB
+	userRepository        userInfra.UserRepository
+	accountBookRepository accountBookInfra.AccountBookRepository
+	oauthProvider         *oauth.OAuthProvider
+	db                    *gorm.DB
 }
 
 func NewAuthService(
 	userRepository userInfra.UserRepository,
+	accountBookRepository accountBookInfra.AccountBookRepository,
 	oauthProvider *oauth.OAuthProvider,
 	db *gorm.DB,
 ) *AuthService {
 	return &AuthService{
-		userRepository: userRepository,
-		oauthProvider:  oauthProvider,
-		db:             db,
+		userRepository:        userRepository,
+		oauthProvider:         oauthProvider,
+		db:                    db,
+		accountBookRepository: accountBookRepository,
 	}
 }
 
@@ -43,6 +49,8 @@ func (s *AuthService) OAuth(code, provider string) (*dto.OauthResponse, error) {
 	var (
 		responseDto *dto.OauthResponse
 		userInfo    *oauth.OauthInfo
+		user        *userModel.User
+		accountBook *accountModel.AccountBook
 		err         error
 	)
 
@@ -53,9 +61,28 @@ func (s *AuthService) OAuth(code, provider string) (*dto.OauthResponse, error) {
 		}
 
 		// 유저 정보를 찾고, 없다면 생성 후 토큰 발행
-		responseDto, err = s.generateAccessToken(tx, userInfo, provider)
+		responseDto, user, err = s.generateAccessToken(tx, userInfo, provider)
 		if err != nil {
 			return appError.Wrap(err)
+		}
+
+		_, exists, err := s.accountBookRepository.FindByUserId(tx, user.Id)
+
+		if err != nil {
+			return appError.Wrap(err)
+		}
+
+		if !exists {
+			// 사용자의 계좌를 생성 TODO: 이벤트 소싱으로 변경
+			accountBook, err = accountModel.New(user.Id, fmt.Sprintf("%s의 가계부", user.Name))
+
+			if err != nil {
+				return appError.Wrap(err)
+			}
+
+			if err := s.accountBookRepository.Save(tx, accountBook); err != nil {
+				return appError.Wrap(err)
+			}
 		}
 
 		return nil
@@ -68,11 +95,11 @@ func (s *AuthService) OAuth(code, provider string) (*dto.OauthResponse, error) {
 	return responseDto, nil
 }
 
-func (s *AuthService) generateAccessToken(tx *gorm.DB, userInfo *oauth.OauthInfo, provider string) (*dto.OauthResponse, error) {
+func (s *AuthService) generateAccessToken(tx *gorm.DB, userInfo *oauth.OauthInfo, provider string) (*dto.OauthResponse, *userModel.User, error) {
 	sync := false
 	user, exists, err := s.userRepository.FindByEmail(tx, userInfo.Email)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	if exists {
@@ -83,15 +110,15 @@ func (s *AuthService) generateAccessToken(tx *gorm.DB, userInfo *oauth.OauthInfo
 	} else {
 		user, err = userModel.New(userInfo.Email, userInfo.Name, []string{provider})
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 	}
 
 	accessToken, err := user.EncodeAccessToken()
 
 	if err := s.userRepository.Save(tx, user); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return &dto.OauthResponse{AccessToken: accessToken, Sync: sync, ExpiredAt: time.Now().Add(jwt.AccessTokenExpiredAfter)}, err
+	return &dto.OauthResponse{AccessToken: accessToken, Sync: sync, ExpiredAt: time.Now().Add(jwt.AccessTokenExpiredAfter)}, user, err
 }

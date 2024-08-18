@@ -2,7 +2,7 @@ package domain
 
 import (
 	appError "banana-account-book.com/internal/libs/app-error"
-	"banana-account-book.com/internal/libs/entity"
+	"banana-account-book.com/internal/libs/ddd"
 	httpCode "banana-account-book.com/internal/libs/http/code"
 	"banana-account-book.com/internal/libs/jwt"
 	"github.com/google/uuid"
@@ -10,7 +10,7 @@ import (
 )
 
 type User struct {
-	entity.SoftDeletableAggregate
+	ddd.SoftDeletableAggregate
 	Id           uuid.UUID      `json:"id" gorm:"primaryKey; type:uuid"`
 	Email        string         `json:"email" gorm:"unique;type:varchar(50)"`
 	Name         string         `json:"name" gorm:"type:varchar(50)"`
