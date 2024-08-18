@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestAccount(t *testing.T) {
+func TestUser(t *testing.T) {
 	t.Run("New 테스트", func(t *testing.T) {
 		t.Run("email, name, provider를 받아 User 객체를 만든다", func(t *testing.T) {
 			user, _ := domain.New("email", "name", []string{"kakao"})

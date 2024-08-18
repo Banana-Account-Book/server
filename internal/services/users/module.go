@@ -8,7 +8,7 @@ import (
 )
 
 var Module = fx.Module("users",
-	fx.Provide(infrastructure.NewRepository),
+	fx.Provide(infrastructure.NewUserRepository),
 	fx.Provide(application.NewUserService),
 	fx.Provide(presentation.NewUserController),
 )

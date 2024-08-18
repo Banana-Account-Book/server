@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestAccount(t *testing.T) {
+func TestValidate(t *testing.T) {
 	t.Run("ValidateDto 테스트", func(t *testing.T) {
 		t.Run("required 테스트", func(t *testing.T) {
 			t.Run("없다면 에러를 반환한다.", func(t *testing.T) {

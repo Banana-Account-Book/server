@@ -1,32 +1,43 @@
 package application
 
 import (
+	"fmt"
 	"time"
 
 	appError "banana-account-book.com/internal/libs/app-error"
 	"banana-account-book.com/internal/libs/jwt"
 	"banana-account-book.com/internal/libs/oauth"
+	accountModel "banana-account-book.com/internal/services/accountBooks/domain"
+	accountBookInfra "banana-account-book.com/internal/services/accountBooks/infrastructure"
 	dto "banana-account-book.com/internal/services/auth/dto/_provider"
+	roleModel "banana-account-book.com/internal/services/roles/domain"
+	roleInfra "banana-account-book.com/internal/services/roles/infrastructure"
 	userModel "banana-account-book.com/internal/services/users/domain"
 	userInfra "banana-account-book.com/internal/services/users/infrastructure"
 	"gorm.io/gorm"
 )
 
 type AuthService struct {
-	userRepository userInfra.UserRepository
-	oauthProvider  *oauth.OAuthProvider
-	db             *gorm.DB
+	userRepository        userInfra.UserRepository
+	accountBookRepository accountBookInfra.AccountBookRepository
+	roleRepository        roleInfra.RoleRepository
+	oauthProvider         *oauth.OAuthProvider
+	db                    *gorm.DB
 }
 
 func NewAuthService(
 	userRepository userInfra.UserRepository,
+	accountBookRepository accountBookInfra.AccountBookRepository,
+	roleRepository roleInfra.RoleRepository,
 	oauthProvider *oauth.OAuthProvider,
 	db *gorm.DB,
 ) *AuthService {
 	return &AuthService{
-		userRepository: userRepository,
-		oauthProvider:  oauthProvider,
-		db:             db,
+		userRepository:        userRepository,
+		oauthProvider:         oauthProvider,
+		db:                    db,
+		accountBookRepository: accountBookRepository,
+		roleRepository:        roleRepository,
 	}
 }
 
@@ -85,6 +96,11 @@ func (s *AuthService) generateAccessToken(tx *gorm.DB, userInfo *oauth.OauthInfo
 		if err != nil {
 			return nil, err
 		}
+
+		err = s.createAccountBook(tx, user)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	accessToken, err := user.EncodeAccessToken()
@@ -94,4 +110,28 @@ func (s *AuthService) generateAccessToken(tx *gorm.DB, userInfo *oauth.OauthInfo
 	}
 
 	return &dto.OauthResponse{AccessToken: accessToken, Sync: sync, ExpiredAt: time.Now().Add(jwt.AccessTokenExpiredAfter)}, err
+}
+
+// TODO: 이벤트 소싱으로 변경
+func (s *AuthService) createAccountBook(tx *gorm.DB, user *userModel.User) error {
+	accountBook, err := accountModel.New(user.Id, fmt.Sprintf("%s의 가계부", user.Name))
+
+	if err != nil {
+		return err
+	}
+
+	if err := s.accountBookRepository.Save(tx, accountBook); err != nil {
+		return err
+	}
+
+	role, err := roleModel.New(user.Id, accountBook.Id, "owner")
+	if err != nil {
+		return err
+	}
+
+	if err := s.roleRepository.Save(tx, role); err != nil {
+		return err
+	}
+
+	return err
 }

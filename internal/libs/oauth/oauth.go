@@ -106,17 +106,16 @@ func (o *OAuthProvider) OAuth(provider, code string) (*OauthInfo, error) {
 	if err != nil {
 		return nil, appError.New(httpCode.InternalServerError, fmt.Sprintf("Failed to create request, %v", err), "")
 	}
-	fmt.Println("!!!", client.getConfig(), result.AccessToken)
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", result.AccessToken))
 
 	res, err = o.httpClient.Do(req)
 
 	if err != nil {
-		return nil, appError.New(httpCode.InternalServerError, fmt.Sprintf("Failed to request kakao user info, %v", err), "")
+		return nil, appError.New(httpCode.InternalServerError, fmt.Sprintf("Failed to request user info, %v", err), "")
 	}
 	body, _ := io.ReadAll(res.Body)
 	if res.StatusCode != http.StatusOK {
-		return nil, appError.New(httpCode.Status{Code: res.StatusCode}, fmt.Sprintf("unexpected status code: %d, body: %s", res.StatusCode, string(body)), "")
+		return nil, appError.New(httpCode.Status{Code: res.StatusCode}, fmt.Sprintf("unexpected status code: %d, body: %s", res.StatusCode, string(body)), "Internal Server Error")
 	}
 
 	return client.parseUserInfo(body)
