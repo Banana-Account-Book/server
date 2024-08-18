@@ -64,7 +64,7 @@ func (o *OAuthProvider) GetUrl(provider string) (string, error) {
 	}
 	params := url.Values{}
 	params.Add("client_id", client.getConfig().clientId)
-	params.Add("redirect_uri", client.getConfig().redirectUri)
+	params.Add("redirect_uri", client.getConfig().redirectUri+"?provider="+provider)
 	params.Add("response_type", "code")
 	params.Add("state", client.getConfig().state)
 	params.Add("scope", client.getConfig().scope)
