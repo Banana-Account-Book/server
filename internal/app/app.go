@@ -44,7 +44,7 @@ func (app *App) Stop() {
 	}()
 }
 
-func NewServer(lc fx.Lifecycle, userController *user.UserController, authController *auth.AuthController) *App {
+func NewServer(lc fx.Lifecycle, userController *user.UserController, authController *auth.AuthController, authHandler *middlewares.AuthHandler) *App {
 	app := New()
 
 	lc.Append(fx.Hook{
@@ -69,7 +69,7 @@ func NewServer(lc fx.Lifecycle, userController *user.UserController, authControl
 					DocExpansion: "none",
 				}))
 
-				router.Route(app.App, userController, authController)
+				router.Route(app.App, userController, authController, authHandler)
 				port := os.Getenv("PORT")
 				fmt.Println("🔥Server started on port:", port, "🔥")
 				app.Start(port)

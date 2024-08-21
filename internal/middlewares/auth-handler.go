@@ -7,11 +7,28 @@ import (
 	"banana-account-book.com/internal/config"
 	appError "banana-account-book.com/internal/libs/app-error"
 	httpCode "banana-account-book.com/internal/libs/http/code"
+	roleModel "banana-account-book.com/internal/services/roles/domain"
+	roleInfra "banana-account-book.com/internal/services/roles/infrastructure"
+	userModel "banana-account-book.com/internal/services/users/domain"
+	userInfra "banana-account-book.com/internal/services/users/infrastructure"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt"
+	"github.com/google/uuid"
 )
 
-func AuthHandler() fiber.Handler {
+type AuthHandler struct {
+	userRepository userInfra.UserRepository
+	roleRepository roleInfra.RoleRepository
+}
+
+func NewAuthHandler(userRepository userInfra.UserRepository, roleRepository roleInfra.RoleRepository) *AuthHandler {
+	return &AuthHandler{
+		userRepository: userRepository,
+		roleRepository: roleRepository,
+	}
+}
+
+func (a *AuthHandler) Auth() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		auth := c.Get("Authorization")
 		splitToken := strings.Split(auth, " ")
@@ -32,10 +49,33 @@ func AuthHandler() fiber.Handler {
 		}
 
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-			c.Locals("userId", claims["userId"])
+			user, roles, err := a.getUserAndRoles(uuid.MustParse(claims["userId"].(string)))
+
+			if err != nil {
+				return appError.Wrap(err)
+			}
+
+			c.Locals("user", user)
+			c.Locals("roles", roles)
+
 			return c.Next()
 		}
 
 		return c.Next()
 	}
+}
+
+func (a *AuthHandler) getUserAndRoles(userId uuid.UUID) (*userModel.User, []*roleModel.Role, error) {
+	user, err := a.userRepository.FindOneOrFail(nil, userId)
+	if err != nil {
+		return nil, nil, appError.New(httpCode.Unauthorized, fmt.Sprintf("Unauthorized: %v", err), "")
+	}
+
+	roles, _, err := a.roleRepository.FindByUserId(nil, userId)
+
+	if err != nil {
+		return nil, nil, appError.New(httpCode.Unauthorized, fmt.Sprintf("Unauthorized: %v", err), "")
+	}
+
+	return user, roles, nil
 }
