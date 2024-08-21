@@ -6,11 +6,13 @@ import (
 	appError "banana-account-book.com/internal/libs/app-error"
 	httpCode "banana-account-book.com/internal/libs/http/code"
 	"banana-account-book.com/internal/services/users/domain"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type UserRepository interface {
 	FindByEmail(db *gorm.DB, email string) (*domain.User, bool, error)
+	FindOneOrFail(db *gorm.DB, id uuid.UUID) (*domain.User, error)
 	Save(db *gorm.DB, user *domain.User) error
 }
 
@@ -35,6 +37,22 @@ func (r *UserRepositoryImpl) FindByEmail(db *gorm.DB, email string) (*domain.Use
 		return nil, false, nil
 	}
 	return &users[0], true, nil
+}
+
+func (r *UserRepositoryImpl) FindOneOrFail(db *gorm.DB, id uuid.UUID) (*domain.User, error) {
+	if db == nil {
+		db = r.manager
+	}
+
+	var user *domain.User
+	if err := db.Where("id = ?", id).First(&user).Error; err != nil {
+		return nil, appError.New(httpCode.InternalServerError, fmt.Sprintf("Failed to findById user. %s", err.Error()), "")
+	}
+	if user == nil {
+		return nil, appError.New(httpCode.NotFound, fmt.Sprintf("User(%s) not found", id.String()), "")
+	}
+
+	return user, nil
 }
 
 func (r *UserRepositoryImpl) Save(db *gorm.DB, user *domain.User) error {
