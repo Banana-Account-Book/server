@@ -16,6 +16,20 @@ definitions:
       sync:
         type: boolean
     type: object
+  dto.UpdateUserRequestBody:
+    properties:
+      name:
+        type: string
+    type: object
+  dto.UpdateUserResponse:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+    type: object
 info:
   contact:
     email: hch950627@naver.com
@@ -88,4 +102,32 @@ paths:
       summary: oauth
       tags:
       - auth
+  /users:
+    patch:
+      consumes:
+      - application/json
+      description: 유저 정보 수정
+      parameters:
+      - description: name
+        in: body
+        name: name
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateUserRequestBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully updated
+          schema:
+            $ref: '#/definitions/dto.UpdateUserResponse'
+        "400":
+          description: Bad request
+          schema: {}
+        "500":
+          description: Internal server error
+          schema: {}
+      summary: User Update
+      tags:
+      - users
 swagger: "2.0"

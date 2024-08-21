@@ -49,7 +49,7 @@ func (a *AuthHandler) Auth() fiber.Handler {
 		}
 
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-			user, roles, err := a.getUserAndRoles(uuid.MustParse(claims["id"].(string)))
+			user, roles, err := a.getUserAndRoles(uuid.MustParse(claims["userId"].(string)))
 
 			if err != nil {
 				return appError.Wrap(err)

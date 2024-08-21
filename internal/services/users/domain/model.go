@@ -90,3 +90,13 @@ func (u *User) HasProvider(provider string) bool {
 func (u *User) AddProvider(provider string) {
 	u.Providers = append(u.Providers, provider)
 }
+
+type UpdateType struct {
+	Name *string `json:"name,omitempty"`
+}
+
+func (u *User) Update(update UpdateType) {
+	if update.Name != nil {
+		u.Name = *update.Name
+	}
+}

@@ -83,7 +83,7 @@ func (s *AuthService) generateAccessToken(tx *gorm.DB, userInfo *oauth.OauthInfo
 	sync := false
 	user, exists, err := s.userRepository.FindByEmail(tx, userInfo.Email)
 	if err != nil {
-		return nil, err
+		return nil, appError.Wrap(err)
 	}
 
 	if exists {
@@ -94,19 +94,19 @@ func (s *AuthService) generateAccessToken(tx *gorm.DB, userInfo *oauth.OauthInfo
 	} else {
 		user, err = userModel.New(userInfo.Email, userInfo.Name, []string{provider})
 		if err != nil {
-			return nil, err
+			return nil, appError.Wrap(err)
 		}
 
 		err = s.createAccountBook(tx, user)
 		if err != nil {
-			return nil, err
+			return nil, appError.Wrap(err)
 		}
 	}
 
 	accessToken, err := user.EncodeAccessToken()
 
 	if err := s.userRepository.Save(tx, user); err != nil {
-		return nil, err
+		return nil, appError.Wrap(err)
 	}
 
 	return &dto.OauthResponse{AccessToken: accessToken, Sync: sync, ExpiredAt: time.Now().Add(jwt.AccessTokenExpiredAfter)}, err
@@ -117,21 +117,21 @@ func (s *AuthService) createAccountBook(tx *gorm.DB, user *userModel.User) error
 	accountBook, err := accountModel.New(user.Id, fmt.Sprintf("%s의 가계부", user.Name))
 
 	if err != nil {
-		return err
+		return appError.Wrap(err)
 	}
 
 	if err := s.accountBookRepository.Save(tx, accountBook); err != nil {
-		return err
+		return appError.Wrap(err)
 	}
 
 	role, err := roleModel.New(user.Id, accountBook.Id, "owner")
 	if err != nil {
-		return err
+		return appError.Wrap(err)
 	}
 
 	if err := s.roleRepository.Save(tx, role); err != nil {
-		return err
+		return appError.Wrap(err)
 	}
 
-	return err
+	return nil
 }

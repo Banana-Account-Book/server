@@ -31,7 +31,7 @@ func (r *UserRepositoryImpl) FindByEmail(db *gorm.DB, email string) (*domain.Use
 
 	users := []domain.User{}
 	if err := db.Where("email = ?", email).Find(&users).Error; err != nil {
-		return nil, false, appError.New(httpCode.InternalServerError, fmt.Sprintf("Failed to findByEmail user. %s", err.Error()), "")
+		return nil, false, appError.New(httpCode.InternalServerError, fmt.Sprintf("Failed to findByEmail user. %v", err), "")
 	}
 	if len(users) == 0 {
 		return nil, false, nil
