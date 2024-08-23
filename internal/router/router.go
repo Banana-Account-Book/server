@@ -5,6 +5,7 @@ import (
 
 	"banana-account-book.com/internal/libs/health"
 	"banana-account-book.com/internal/middlewares"
+	accountBookPresentation "banana-account-book.com/internal/services/accountBooks/presentation"
 	authPresentation "banana-account-book.com/internal/services/auth/presentation"
 	userPresentation "banana-account-book.com/internal/services/users/presentation"
 	"github.com/gofiber/fiber/v2"
@@ -23,12 +24,20 @@ func Route(
 	userController *userPresentation.UserController,
 	authController *authPresentation.AuthController,
 	authHandler *middlewares.AuthHandler,
+	accountBookController *accountBookPresentation.AccountBookController,
 ) {
 	health.Check(r)
 
-	userRoute := r.Group("/users", authHandler.Auth())
+	// public router
+	publicRouter := r.Group("/")
+	authRoute := publicRouter.Group("/auth")
+	authController.Route(authRoute)
+
+	// private router
+	privateRouter := r.Group("/", authHandler.Auth())
+	userRoute := privateRouter.Group("/users")
 	userController.Route(userRoute)
 
-	authRoute := r.Group("/auth")
-	authController.Route(authRoute)
+	accountBookRoute := privateRouter.Group("/account-books")
+	accountBookController.Route(accountBookRoute)
 }

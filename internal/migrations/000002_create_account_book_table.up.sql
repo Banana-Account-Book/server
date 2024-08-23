@@ -1,6 +1,6 @@
 BEGIN;
 
-CREATE TABLE "account" (
+CREATE TABLE "account_book" (
     "createdAt" timestamptz,
     "updatedAt" timestamptz,
     "deletedAt" timestamptz,

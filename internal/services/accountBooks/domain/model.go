@@ -13,7 +13,7 @@ type AccountBook struct {
 }
 
 func (a *AccountBook) TableName() string {
-	return "account"
+	return "account_book"
 }
 
 func New(userId uuid.UUID, name string) (*AccountBook, error) {
