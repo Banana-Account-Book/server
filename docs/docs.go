@@ -22,6 +22,57 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/account-books": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "로그인 한 사용자의 가계부를 생성한다.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "accountBooks"
+                ],
+                "summary": "가계부 생성",
+                "parameters": [
+                    {
+                        "description": "Account Book details",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.AddAccountBookRequestBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "created",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/appError.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/appError.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/{provider}": {
             "get": {
                 "description": "각 provider에 의한 Oauth 링크 반환",
@@ -103,18 +154,27 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad request",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/appError.ErrorResponse"
+                        }
                     },
                     "500": {
                         "description": "Internal server error",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/appError.ErrorResponse"
+                        }
                     }
                 }
             }
         },
         "/users": {
             "patch": {
-                "description": "유저 정보 수정",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "인증된 사용자의 정보를 업데이트한다.",
                 "consumes": [
                     "application/json"
                 ],
@@ -124,11 +184,11 @@ const docTemplate = `{
                 "tags": [
                     "users"
                 ],
-                "summary": "User Update",
+                "summary": "사용자 정보 업데이트",
                 "parameters": [
                     {
-                        "description": "name",
-                        "name": "name",
+                        "description": "Updated user information",
+                        "name": "body",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -138,24 +198,53 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successfully updated",
+                        "description": "Updated user information",
                         "schema": {
                             "$ref": "#/definitions/dto.UpdateUserResponse"
                         }
                     },
                     "400": {
-                        "description": "Bad request",
-                        "schema": {}
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/appError.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/appError.ErrorResponse"
+                        }
                     },
                     "500": {
-                        "description": "Internal server error",
-                        "schema": {}
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/appError.ErrorResponse"
+                        }
                     }
                 }
             }
         }
     },
     "definitions": {
+        "appError.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.AddAccountBookRequestBody": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.OauthRequestBody": {
             "type": "object",
             "required": [

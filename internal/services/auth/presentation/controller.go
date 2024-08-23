@@ -62,8 +62,8 @@ func (c *AuthController) GetLink(ctx *fiber.Ctx) error {
 // @Param provider path string true "Authentication provider"
 // @Param code body dto.OauthRequestBody true "Oauth code"
 // @Success 200 {object} dto.OauthResponse "Successfully retrieved auth URL"
-// @Failure 400 {object} error "Bad request"
-// @Failure 500 {object} error "Internal server error"
+// @Failure 400 {object} appError.ErrorResponse "Bad request"
+// @Failure 500 {object} appError.ErrorResponse "Internal server error"
 // @Router /auth/{provider} [post]
 func (c *AuthController) Callback(ctx *fiber.Ctx) error {
 	// 1. ctx destructuring

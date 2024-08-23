@@ -1,5 +1,17 @@
 basePath: /
 definitions:
+  appError.ErrorResponse:
+    properties:
+      data:
+        type: string
+    type: object
+  dto.AddAccountBookRequestBody:
+    properties:
+      name:
+        type: string
+    required:
+    - name
+    type: object
   dto.OauthRequestBody:
     properties:
       code:
@@ -41,6 +53,38 @@ info:
   title: Banana Account Book API
   version: "1.0"
 paths:
+  /account-books:
+    post:
+      consumes:
+      - application/json
+      description: 로그인 한 사용자의 가계부를 생성한다.
+      parameters:
+      - description: Account Book details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AddAccountBookRequestBody'
+      produces:
+      - text/plain
+      responses:
+        "201":
+          description: created
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/appError.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/appError.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: 가계부 생성
+      tags:
+      - accountBooks
   /auth/{provider}:
     get:
       consumes:
@@ -95,10 +139,12 @@ paths:
             $ref: '#/definitions/dto.OauthResponse'
         "400":
           description: Bad request
-          schema: {}
+          schema:
+            $ref: '#/definitions/appError.ErrorResponse'
         "500":
           description: Internal server error
-          schema: {}
+          schema:
+            $ref: '#/definitions/appError.ErrorResponse'
       summary: oauth
       tags:
       - auth
@@ -106,11 +152,11 @@ paths:
     patch:
       consumes:
       - application/json
-      description: 유저 정보 수정
+      description: 인증된 사용자의 정보를 업데이트한다.
       parameters:
-      - description: name
+      - description: Updated user information
         in: body
-        name: name
+        name: body
         required: true
         schema:
           $ref: '#/definitions/dto.UpdateUserRequestBody'
@@ -118,16 +164,24 @@ paths:
       - application/json
       responses:
         "200":
-          description: Successfully updated
+          description: Updated user information
           schema:
             $ref: '#/definitions/dto.UpdateUserResponse'
         "400":
-          description: Bad request
-          schema: {}
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/appError.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/appError.ErrorResponse'
         "500":
-          description: Internal server error
-          schema: {}
-      summary: User Update
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/appError.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: 사용자 정보 업데이트
       tags:
       - users
 swagger: "2.0"

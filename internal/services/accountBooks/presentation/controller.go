@@ -24,6 +24,17 @@ func (c *AccountBookController) Route(r fiber.Router) {
 	r.Post("/", c.add)
 }
 
+// @Summary 가계부 생성
+// @Description 로그인 한 사용자의 가계부를 생성한다.
+// @Tags accountBooks
+// @Accept json
+// @Produce plain
+// @Param body body dto.AddAccountBookRequestBody true "Account Book details"
+// @Success 201 {string} string "created"
+// @Failure 400 {object} appError.ErrorResponse "Bad Request"
+// @Failure 500 {object} appError.ErrorResponse "Internal Server Error"
+// @Security BearerAuth
+// @Router /account-books [post]
 func (c *AccountBookController) add(ctx *fiber.Ctx) error {
 	// 1. ctx destructuring
 	var body dto.AddAccountBookRequestBody
