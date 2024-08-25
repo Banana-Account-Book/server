@@ -24,16 +24,17 @@ func (c *UserController) Route(r fiber.Router) {
 	r.Patch("/", c.update)
 }
 
-// user update godoc
-// @Summary User Update
-// @Description 유저 정보 수정
+// @Summary 사용자 정보 업데이트
+// @Description 인증된 사용자의 정보를 업데이트한다.
 // @Tags users
 // @Accept json
 // @Produce json
-// @Param name body dto.UpdateUserRequestBody "수정할 user name"
-// @Success 200 {object} dto.UpdateUserResponse "Successfully updated"
-// @Failure 400 {object} error "Bad request"
-// @Failure 500 {object} error "Internal server error"
+// @Param body body dto.UpdateUserRequestBody true "Updated user information"
+// @Success 200 {object} dto.UpdateUserResponse "Updated user information"
+// @Failure 400 {object} appError.ErrorResponse "Bad Request"
+// @Failure 401 {object} appError.ErrorResponse "Unauthorized"
+// @Failure 500 {object} appError.ErrorResponse "Internal Server Error"
+// @Security BearerAuth
 // @Router /users [patch]
 func (c *UserController) update(ctx *fiber.Ctx) error {
 	// 1. ctx destructuring

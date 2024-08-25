@@ -19,8 +19,8 @@ func main() {
 		fx.Provide(middlewares.NewAuthHandler),
 		users.Module,
 		auth.Module,
-		accountBooks.Module,
 		roles.Module,
+		accountBooks.Module,
 		fx.Invoke(func(*app.App) {}),
 		fx.Invoke(func(*gorm.DB) {}),
 	).Run()
