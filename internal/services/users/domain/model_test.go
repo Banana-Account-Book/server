@@ -37,4 +37,13 @@ func TestUser(t *testing.T) {
 			assert.Equal(t, user.Providers, pq.StringArray{"kakao", "naver"})
 		})
 	})
+
+	t.Run("Update 테스트", func(t *testing.T) {
+		t.Run("Name을 변경할 수 있다.", func(t *testing.T) {
+			user, _ := domain.New("email", "name", []string{"kakao"})
+			name := "new Name"
+			user.Update(domain.UpdateType{Name: &name})
+			assert.Equal(t, user.Name, "new Name")
+		})
+	})
 }
