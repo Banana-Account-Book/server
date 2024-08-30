@@ -8,6 +8,10 @@ import (
 )
 
 func ErrorHandler(ctx *fiber.Ctx, err error) error {
+	if e, ok := err.(*fiber.Error); ok {
+		return ctx.Status(e.Code).JSON(fiber.Map{"message": e.Message})
+	}
+
 	e := appError.UnWrap(err)
 	ctx.Set(fiber.HeaderContentType, fiber.MIMETextPlainCharsetUTF8)
 
