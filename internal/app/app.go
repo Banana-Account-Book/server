@@ -11,6 +11,7 @@ import (
 	"banana-account-book.com/internal/router"
 	accountBook "banana-account-book.com/internal/services/accountBooks/presentation"
 	auth "banana-account-book.com/internal/services/auth/presentation"
+	transaction "banana-account-book.com/internal/services/transactions/presentation"
 	user "banana-account-book.com/internal/services/users/presentation"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -51,6 +52,7 @@ func NewServer(
 	authController *auth.AuthController,
 	authHandler *middlewares.AuthHandler,
 	accountBookController *accountBook.AccountBookController,
+	transactionController *transaction.TransactionController,
 ) *App {
 	app := New()
 
@@ -76,7 +78,15 @@ func NewServer(
 					DocExpansion: "none",
 				}))
 
-				router.Route(app.App, userController, authController, authHandler, accountBookController)
+				router.Route(
+					app.App,
+					userController,
+					authController,
+					authHandler,
+					accountBookController,
+					transactionController,
+				)
+
 				port := os.Getenv("PORT")
 				fmt.Println("🔥Server started on port:", port, "🔥")
 				app.Start(port)
