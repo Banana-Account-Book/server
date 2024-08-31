@@ -9,7 +9,6 @@ import (
 )
 
 func TestValidate(t *testing.T) {
-	//TODO: before all
 	validate.Init()
 	t.Run("ValidateDto 테스트", func(t *testing.T) {
 		t.Run("required 테스트", func(t *testing.T) {
