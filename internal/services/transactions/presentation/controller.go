@@ -25,6 +25,19 @@ func (c *TransactionController) Route(r fiber.Router) {
 	r.Post("/", c.add)
 }
 
+// @Summary 거래내역 생성
+// @Description 거래내역을 생성한다.
+// @Tags transactions
+// @Accept json
+// @Produce json
+// @Param body body dto.CreateTransactionRequest true "Add Transaction information"
+// @Param accountBookId path string true "account book id"
+// @Success 200 {object} dto.UpdateUserResponse "Updated user information"
+// @Failure 400 {object} appError.ErrorResponse "Bad Request"
+// @Failure 401 {object} appError.ErrorResponse "Unauthorized"
+// @Failure 500 {object} appError.ErrorResponse "Internal Server Error"
+// @Security BearerAuth
+// @Router /account-books/:accountBookId/transactions [post]
 func (c *TransactionController) add(ctx *fiber.Ctx) error {
 	// 1. ctx destructuring
 	var body dto.CreateTransactionRequest

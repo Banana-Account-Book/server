@@ -12,6 +12,39 @@ definitions:
     required:
     - name
     type: object
+  dto.CreateTransactionRequest:
+    properties:
+      amount:
+        minimum: 0
+        type: integer
+      description:
+        type: string
+      periodEndOn:
+        type: string
+      periodStartOn:
+        type: string
+      repeatType:
+        enum:
+        - none
+        - daily
+        - weekly
+        - monthly
+        - yearly
+        type: string
+      title:
+        type: string
+      type:
+        enum:
+        - income
+        - expense
+        type: string
+    required:
+    - amount
+    - periodStartOn
+    - repeatType
+    - title
+    - type
+    type: object
   dto.OauthRequestBody:
     properties:
       code:
@@ -85,6 +118,47 @@ paths:
       summary: 가계부 생성
       tags:
       - accountBooks
+  /account-books/:accountBookId/transactions:
+    post:
+      consumes:
+      - application/json
+      description: 거래내역을 생성한다.
+      parameters:
+      - description: Add Transaction information
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateTransactionRequest'
+      - description: account book id
+        in: path
+        name: accountBookId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated user information
+          schema:
+            $ref: '#/definitions/dto.UpdateUserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/appError.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/appError.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/appError.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: 거래내역 생성
+      tags:
+      - transactions
   /auth/{provider}:
     get:
       consumes:
