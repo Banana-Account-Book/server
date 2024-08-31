@@ -4,10 +4,13 @@ import (
 	"testing"
 
 	"banana-account-book.com/internal/libs/validate"
+	"banana-account-book.com/internal/types"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestValidate(t *testing.T) {
+	//TODO: before all
+	validate.Init()
 	t.Run("ValidateDto 테스트", func(t *testing.T) {
 		t.Run("required 테스트", func(t *testing.T) {
 			t.Run("없다면 에러를 반환한다.", func(t *testing.T) {
@@ -92,20 +95,36 @@ func TestValidate(t *testing.T) {
 			assert.NotNil(t, err)
 			assert.Equal(t, "Required는(은) 필수 값입니다.\nEmail는(은) 반드시 이메일 형식이어야 합니다.", err.Error())
 		})
-	})
-	t.Run("oneof 테스트", func(t *testing.T) {
-		t.Run("허용되지 않는 값이라면 에러를 반환한다.", func(t *testing.T) {
-			type OneOfTest struct {
-				OneOf string `validate:"oneof=google kakao naver"`
-			}
+		t.Run("oneof 테스트", func(t *testing.T) {
+			t.Run("허용되지 않는 값이라면 에러를 반환한다.", func(t *testing.T) {
+				type OneOfTest struct {
+					OneOf string `validate:"oneof=google kakao naver"`
+				}
 
-			oneOfTest := OneOfTest{
-				OneOf: "facebook",
-			}
+				oneOfTest := OneOfTest{
+					OneOf: "facebook",
+				}
 
-			err := validate.ValidateDto(oneOfTest)
-			assert.NotNil(t, err)
-			assert.Equal(t, "OneOf는(은) 반드시 'google', 'kakao', 'naver' 중 하나여야 합니다.", err.Error())
+				err := validate.ValidateDto(oneOfTest)
+				assert.NotNil(t, err)
+				assert.Equal(t, "OneOf는(은) 반드시 'google', 'kakao', 'naver' 중 하나여야 합니다.", err.Error())
+			})
+		})
+
+		t.Run("calendardate 테스트", func(t *testing.T) {
+			t.Run("YYYY-MM-DD 포맷이 아니라면 에러를 반환한다.", func(t *testing.T) {
+				type calendarDateType struct {
+					Date types.CalendarDate `validate:"calendardate"`
+				}
+
+				dto := calendarDateType{
+					Date: types.CalendarDate("2024-09-01T00:00:00.000Z"),
+				}
+
+				err := validate.ValidateDto(dto)
+				assert.NotNil(t, err)
+				assert.Equal(t, "Date는(은) 반드시 YYYY-MM-DD 형식이어야 합니다.", err.Error())
+			})
 		})
 	})
 }
