@@ -11,6 +11,25 @@ import (
 	"github.com/google/uuid"
 )
 
+type TransactionType string
+
+const (
+	Income   TransactionType = "Income"
+	Expense  TransactionType = "Expense"
+	Transfer TransactionType = "Transfer"
+)
+
+type RepeatPeriod string
+
+const (
+	None    RepeatPeriod = "None"
+	Daily   RepeatPeriod = "Daily"
+	Weekly  RepeatPeriod = "Weekly"
+	Monthly RepeatPeriod = "Monthly"
+	Yearly  RepeatPeriod = "Yearly"
+	Custom  RepeatPeriod = "Custom"
+)
+
 type TransactionDetails struct {
 	UserId        uuid.UUID
 	AccountBookId uuid.UUID
@@ -18,8 +37,8 @@ type TransactionDetails struct {
 	Description   string
 	PeriodStartOn types.CalendarDate
 	PeriodEndOn   *types.CalendarDate
-	Type          string
-	RepeatType    string
+	Type          TransactionType
+	RepeatType    RepeatPeriod
 	Amount        int
 }
 
@@ -33,9 +52,9 @@ type Transaction struct {
 	RegisteredAt  time.Time           `json:"registeredAt" gorm:"column:registeredAt; not null; type:timestamptz;"`
 	PeriodStartOn types.CalendarDate  `json:"periodStart" gorm:"column:periodStartOn; not null; type:date;"`
 	PeriodEndOn   *types.CalendarDate `json:"periodEnd" gorm:"column:periodEndOn; type:date;"`
-	Type          string              `json:"type" gorm:"type:varchar(20); column:type; not null;"`
+	Type          TransactionType     `json:"type" gorm:"type:varchar(20); column:type; not null;"`
 	Amount        int                 `json:"amount" gorm:"column:amount; not null;"`
-	RepeatType    string              `json:"repeatType" gorm:"type:varchar(20); column:repeatType;"`
+	RepeatType    RepeatPeriod        `json:"repeatType" gorm:"type:varchar(20); column:repeatType;"`
 	Exclusives    []Exclusive         `gorm:"foreignKey:TransactionId; references:Id"`
 }
 
