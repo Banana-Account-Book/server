@@ -7,6 +7,7 @@ import (
 	"banana-account-book.com/internal/middlewares"
 	accountBookPresentation "banana-account-book.com/internal/services/accountBooks/presentation"
 	authPresentation "banana-account-book.com/internal/services/auth/presentation"
+	transactionPresentation "banana-account-book.com/internal/services/transactions/presentation"
 	userPresentation "banana-account-book.com/internal/services/users/presentation"
 	"github.com/gofiber/fiber/v2"
 )
@@ -25,6 +26,7 @@ func Route(
 	authController *authPresentation.AuthController,
 	authHandler *middlewares.AuthHandler,
 	accountBookController *accountBookPresentation.AccountBookController,
+	transactionController *transactionPresentation.TransactionController,
 ) {
 	health.Check(r)
 
@@ -40,4 +42,7 @@ func Route(
 
 	accountBookRoute := privateRouter.Group("/account-books")
 	accountBookController.Route(accountBookRoute)
+
+	transactionRoute := privateRouter.Group("/account-books/:accountBookId/transactions")
+	transactionController.Route(transactionRoute)
 }

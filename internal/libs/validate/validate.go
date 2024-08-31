@@ -3,13 +3,29 @@ package validate
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	appError "banana-account-book.com/internal/libs/app-error"
 	httpCode "banana-account-book.com/internal/libs/http/code"
+	"banana-account-book.com/internal/types"
 	"github.com/go-playground/validator"
 )
 
-var validate = validator.New()
+var validate *validator.Validate
+
+func ValidateCalendarDateFormat(fl validator.FieldLevel) bool {
+	date, ok := fl.Field().Interface().(types.CalendarDate)
+	if !ok {
+		return false
+	}
+	_, err := time.Parse(types.CalendarDateFormat, string(date))
+	return err == nil
+}
+
+func Init() {
+	validate = validator.New()
+	validate.RegisterValidation("calendardate", ValidateCalendarDateFormat)
+}
 
 func ValidateDto(dto any) error {
 	if err := validate.Struct(dto); err != nil {
@@ -32,6 +48,8 @@ func ValidateDto(dto any) error {
 						words[i] = "'" + word + "'"
 					}
 					errorMsg = fmt.Sprintf("%s는(은) 반드시 %s 중 하나여야 합니다.", err.Field(), strings.Join(words, ", "))
+				case "calendardate":
+					errorMsg = fmt.Sprintf("%s는(은) 반드시 YYYY-MM-DD 형식이어야 합니다.", err.Field())
 				default:
 					errorMsg = fmt.Sprintf("%s는(은) 유효하지 않은 값입니다.", err.Field())
 				}

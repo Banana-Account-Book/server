@@ -1,0 +1,6 @@
+BEGIN;
+
+DROP TABLE IF EXISTS "exclusive";
+DROP TABLE IF EXISTS "transaction";
+
+COMMIT;

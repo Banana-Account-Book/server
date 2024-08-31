@@ -66,6 +66,70 @@
                 }
             }
         },
+        "/account-books/:accountBookId/transactions": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "거래내역을 생성한다.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "transactions"
+                ],
+                "summary": "거래내역 생성",
+                "parameters": [
+                    {
+                        "description": "Add Transaction information",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateTransactionRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "account book id",
+                        "name": "accountBookId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated user information",
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateUserResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/appError.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/appError.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/appError.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/{provider}": {
             "get": {
                 "description": "각 provider에 의한 Oauth 링크 반환",
@@ -235,6 +299,51 @@
             "properties": {
                 "name": {
                     "type": "string"
+                }
+            }
+        },
+        "dto.CreateTransactionRequest": {
+            "type": "object",
+            "required": [
+                "amount",
+                "periodStartOn",
+                "repeatType",
+                "title",
+                "type"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "description": {
+                    "type": "string"
+                },
+                "periodEndOn": {
+                    "type": "string"
+                },
+                "periodStartOn": {
+                    "type": "string"
+                },
+                "repeatType": {
+                    "type": "string",
+                    "enum": [
+                        "none",
+                        "daily",
+                        "weekly",
+                        "monthly",
+                        "yearly"
+                    ]
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "income",
+                        "expense"
+                    ]
                 }
             }
         },
