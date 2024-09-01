@@ -137,6 +137,77 @@ const docTemplate = `{
                 }
             }
         },
+        "/account-books/{id}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "로그인 한 사용자의 가계부를 삭제한다.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "accountBooks"
+                ],
+                "summary": "가계부 삭제",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Account Book ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"data\": \"success\"}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/appError.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/appError.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/appError.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/appError.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/appError.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/{provider}": {
             "get": {
                 "description": "각 provider에 의한 Oauth 링크 반환",
@@ -298,6 +369,38 @@ const docTemplate = `{
                 }
             }
         },
+        "domain.RepeatPeriod": {
+            "type": "string",
+            "enum": [
+                "None",
+                "Daily",
+                "Weekly",
+                "Monthly",
+                "Yearly",
+                "Custom"
+            ],
+            "x-enum-varnames": [
+                "None",
+                "Daily",
+                "Weekly",
+                "Monthly",
+                "Yearly",
+                "Custom"
+            ]
+        },
+        "domain.TransactionType": {
+            "type": "string",
+            "enum": [
+                "Income",
+                "Expense",
+                "Transfer"
+            ],
+            "x-enum-varnames": [
+                "Income",
+                "Expense",
+                "Transfer"
+            ]
+        },
         "dto.AddAccountBookRequestBody": {
             "type": "object",
             "required": [
@@ -333,23 +436,33 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "repeatType": {
-                    "type": "string",
                     "enum": [
-                        "none",
-                        "daily",
-                        "weekly",
-                        "monthly",
-                        "yearly"
+                        "None",
+                        "Daily",
+                        "Weekly",
+                        "Monthly",
+                        "Yearly",
+                        "Custom"
+                    ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/domain.RepeatPeriod"
+                        }
                     ]
                 },
                 "title": {
                     "type": "string"
                 },
                 "type": {
-                    "type": "string",
                     "enum": [
-                        "income",
-                        "expense"
+                        "Income",
+                        "Expense",
+                        "Transfer"
+                    ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/domain.TransactionType"
+                        }
                     ]
                 }
             }

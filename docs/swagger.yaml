@@ -5,6 +5,32 @@ definitions:
       data:
         type: string
     type: object
+  domain.RepeatPeriod:
+    enum:
+    - None
+    - Daily
+    - Weekly
+    - Monthly
+    - Yearly
+    - Custom
+    type: string
+    x-enum-varnames:
+    - None
+    - Daily
+    - Weekly
+    - Monthly
+    - Yearly
+    - Custom
+  domain.TransactionType:
+    enum:
+    - Income
+    - Expense
+    - Transfer
+    type: string
+    x-enum-varnames:
+    - Income
+    - Expense
+    - Transfer
   dto.AddAccountBookRequestBody:
     properties:
       name:
@@ -24,20 +50,24 @@ definitions:
       periodStartOn:
         type: string
       repeatType:
+        allOf:
+        - $ref: '#/definitions/domain.RepeatPeriod'
         enum:
-        - none
-        - daily
-        - weekly
-        - monthly
-        - yearly
-        type: string
+        - None
+        - Daily
+        - Weekly
+        - Monthly
+        - Yearly
+        - Custom
       title:
         type: string
       type:
+        allOf:
+        - $ref: '#/definitions/domain.TransactionType'
         enum:
-        - income
-        - expense
-        type: string
+        - Income
+        - Expense
+        - Transfer
     required:
     - amount
     - periodStartOn
@@ -159,6 +189,52 @@ paths:
       summary: 거래내역 생성
       tags:
       - transactions
+  /account-books/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: 로그인 한 사용자의 가계부를 삭제한다.
+      parameters:
+      - description: Account Book ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"data": "success"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/appError.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/appError.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/appError.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/appError.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/appError.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: 가계부 삭제
+      tags:
+      - accountBooks
   /auth/{provider}:
     get:
       consumes:

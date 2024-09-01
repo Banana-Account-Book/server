@@ -40,7 +40,7 @@ func (r *RoleRepositoryImpl) FindByUserId(db *gorm.DB, userId uuid.UUID) ([]*dom
 	}
 
 	roles := []*domain.Role{}
-	if err := db.Where("'userId' = ?", userId).Find(&roles).Error; err != nil {
+	if err := db.Where("\"userId\" = ?::uuid", userId).Find(&roles).Error; err != nil {
 		return nil, false, appError.New(httpCode.InternalServerError, fmt.Sprintf("Failed to findByUserId role. %s", err.Error()), "")
 	}
 	if len(roles) == 0 {
