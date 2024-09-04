@@ -13,5 +13,5 @@ type Aggregate struct {
 
 type SoftDeletableAggregate struct {
 	Aggregate
-	DeletedAt gorm.DeletedAt `json:"-" gorm:"column:deletedAt"`
+	DeletedAt *gorm.DeletedAt `json:"-" gorm:"column:deletedAt"`
 }

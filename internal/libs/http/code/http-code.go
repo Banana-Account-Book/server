@@ -16,4 +16,5 @@ var (
 	NotFound            = Status{Code: 404, Message: "Not Found"}
 	Conflict            = Status{Code: 409, Message: "Conflict"}
 	InternalServerError = Status{Code: 500, Message: "Internal Server Error"}
+	NotImplemented      = Status{Code: 501, Message: "Not Implemented"}
 )
