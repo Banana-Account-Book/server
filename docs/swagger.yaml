@@ -235,6 +235,52 @@ paths:
       summary: 가계부 삭제
       tags:
       - accountBooks
+  /account-books/{id}/accept:
+    post:
+      consumes:
+      - application/json
+      description: 가계부 초대를 수락한다.
+      parameters:
+      - description: Account Book ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"data": "success"}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/appError.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/appError.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/appError.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/appError.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/appError.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: 가계부 초대 수락
+      tags:
+      - accountBooks
   /auth/{provider}:
     get:
       consumes:

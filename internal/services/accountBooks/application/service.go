@@ -72,3 +72,28 @@ func (s *AccountBookService) Delete(roles []*roleModel.Role, accountId uuid.UUID
 
 	return nil
 }
+
+func (s *AccountBookService) AcceptInvite(userId uuid.UUID, accountId uuid.UUID) error {
+	err := s.db.Transaction(func(tx *gorm.DB) error {
+		accountBooks, err := s.accountBookRepository.FindSpec(tx, domainSpec.NewReadableAccountBookSpec(accountId))
+
+		if err != nil {
+			return err
+		}
+
+		accountBook := accountBooks[0]
+
+		role, err := roleModel.New(userId, accountBook.Id, "member")
+		if err != nil {
+			return err
+		}
+
+		return s.roleRepository.Save(tx, role)
+	})
+
+	if err != nil {
+		return appError.Wrap(err)
+	}
+
+	return nil
+}

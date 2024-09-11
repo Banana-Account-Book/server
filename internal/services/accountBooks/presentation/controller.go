@@ -25,6 +25,7 @@ func NewAccountBookController(accountBookService *application.AccountBookService
 func (c *AccountBookController) Route(r fiber.Router) {
 	r.Post("/", c.add)
 	r.Delete("/:id", c.delete)
+	r.Post("/:id/accept", c.accept)
 }
 
 // @Summary 가계부 생성
@@ -80,6 +81,33 @@ func (c *AccountBookController) delete(ctx *fiber.Ctx) error {
 
 	// 2. call application service method
 	if err := c.accountBookService.Delete(roles, uuid.MustParse(accountBookId)); err != nil {
+		return appError.Wrap(err)
+	}
+
+	return ctx.Status(httpCode.Ok.Code).JSON(fiber.Map{"data": "success"})
+}
+
+// @Summary 가계부 초대 수락
+// @Description 가계부 초대를 수락한다.
+// @Tags accountBooks
+// @Accept json
+// @Produce json
+// @Param id path string true "Account Book ID" format(uuid)
+// @Success 200 {object} map[string]string "{"data": "success"}"
+// @Failure 400 {object} appError.ErrorResponse "Bad Request"
+// @Failure 401 {object} appError.ErrorResponse "Unauthorized"
+// @Failure 403 {object} appError.ErrorResponse "Forbidden"
+// @Failure 404 {object} appError.ErrorResponse "Not Found"
+// @Failure 500 {object} appError.ErrorResponse "Internal Server Error"
+// @Security BearerAuth
+// @Router /account-books/{id}/accept [post]
+func (c *AccountBookController) accept(ctx *fiber.Ctx) error {
+	// 1. ctx destructuring
+	user := ctx.Locals("user").(*userModel.User)
+	accountBookId := ctx.Params("id")
+
+	// 2. call application service method
+	if err := c.accountBookService.AcceptInvite(user.Id, uuid.MustParse(accountBookId)); err != nil {
 		return appError.Wrap(err)
 	}
 
